@@ -28,13 +28,14 @@ const styles = () => ({
 });
 
 const ItemStatus = (props) => {
-  const { classes, t, status, variant, disabled } = props;
+  const { classes, t, status, variant, disabled, onClick } = props;
   const style = variant === 'inList' ? classes.chipInList : classes.chip;
   if (status && status.template) {
     return (
       <Chip
         classes={{ root: style }}
         variant="outlined"
+        onClick={onClick}
         label={status.template.name}
         style={{
           color: status.template.color,
@@ -55,6 +56,7 @@ const ItemStatus = (props) => {
 
 ItemStatus.propTypes = {
   classes: PropTypes.object.isRequired,
+  onClick: PropTypes.func,
   status: PropTypes.object,
   variant: PropTypes.string,
   t: PropTypes.func,

@@ -1,8 +1,8 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
-import { useTheme, makeStyles } from '@mui/styles';
+import { useTheme } from '@mui/styles';
 import { BoundaryRoute, NoMatch } from '@components/Error';
 import PlatformCriticalAlertDialog from '@components/settings/platform_alerts/PlatformCriticalAlertDialog';
 import TopBar from './components/nav/TopBar';
@@ -35,20 +35,16 @@ const RootSettings = lazy(() => import('./components/settings/Root'));
 const RootActivity = lazy(() => import('./components/settings/activity/Root'));
 const RootProfile = lazy(() => import('./components/profile/Root'));
 
-const useStyles = makeStyles((theme: Theme) => ({
-  toolbar: theme.mixins.toolbar,
-}));
-
 interface IndexProps {
   settings: RootSettings$data
 }
 
 const Index = ({ settings }: IndexProps) => {
   const theme = useTheme<Theme>();
-  const classes = useStyles();
   const {
     bannerSettings: { bannerHeight },
   } = useAuth();
+  const settingsMessagesBannerHeight = useSettingsMessagesBannerHeight();
   const boxSx = {
     flexGrow: 1,
     padding: 3,
@@ -56,9 +52,10 @@ const Index = ({ settings }: IndexProps) => {
       easing: theme.transitions.easing.easeInOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    overflowX: 'hidden',
+    overflowY: 'hidden',
+    minHeight: '100vh',
+    paddingTop: `calc( 8vh + ${settingsMessagesBannerHeight}px)`,
   };
-  const settingsMessagesBannerHeight = useSettingsMessagesBannerHeight();
   // Change the theme body attribute when the mode changes in
   // the palette because some components like CKEditor uses this
   // body attribute to display correct styles.
@@ -91,10 +88,6 @@ const Index = ({ settings }: IndexProps) => {
         <LeftBar />
         <Message />
         <Box component="main" sx={boxSx}>
-          <div
-            className={classes.toolbar}
-            style={{ marginTop: settingsMessagesBannerHeight }}
-          />
           <Suspense fallback={<Loader />}>
             <Switch>
               <BoundaryRoute exact path="/dashboard" component={Dashboard} />

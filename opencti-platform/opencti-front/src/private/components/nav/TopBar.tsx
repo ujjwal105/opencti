@@ -45,6 +45,7 @@ const useStyles = makeStyles<Theme>((theme) => ({
     zIndex: theme.zIndex.drawer + 1,
     background: 0,
     backgroundColor: theme.palette.background.nav,
+    borderColor: theme.palette.primary.main,
     paddingTop: theme.spacing(0.2),
     borderLeft: 0,
     borderRight: 0,

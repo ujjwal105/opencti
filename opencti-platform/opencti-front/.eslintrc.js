@@ -51,6 +51,7 @@ module.exports = {
     'custom-rules',
   ],
   rules: {
+    '@typescript-eslint/no-non-null-assertion': 'off',
     'custom-rules/classes-rule': 1,
     'no-restricted-syntax': 0,
     'react/no-unused-prop-types': 0,

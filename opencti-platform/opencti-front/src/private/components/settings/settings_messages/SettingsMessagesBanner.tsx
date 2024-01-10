@@ -100,8 +100,8 @@ const extractMessagesToDisplay = (
 
 const ref = React.createRef<HTMLDivElement>();
 export const useSettingsMessagesBannerHeight = () => {
-  const [bannerHeight, setBannerHeight] = useState(
-    ref.current?.clientHeight ?? 0,
+  const [bannerHeight, setBannerHeight] = useState<number>(
+    ref.current?.clientHeight as number ?? 0,
   );
   useBus(
     BANNER_LOCAL_STORAGE_KEY,
@@ -114,7 +114,7 @@ export const useSettingsMessagesBannerHeight = () => {
   );
   // At first render, some component might have finished their render while settings message send the dispatch.
   if (bannerHeight !== ref.current?.clientHeight && ref.current?.clientHeight != null) {
-    setBannerHeight(ref.current?.clientHeight);
+    setBannerHeight(ref.current?.clientHeight as number);
   }
   return bannerHeight;
 };

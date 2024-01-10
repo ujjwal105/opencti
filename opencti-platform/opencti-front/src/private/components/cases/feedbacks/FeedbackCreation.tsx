@@ -36,7 +36,7 @@ const useStyles = makeStyles<Theme>((theme) => ({
 const feedbackMutation = graphql`
   mutation FeedbackCreationMutation($input: FeedbackAddInput!) {
     feedbackAdd(input: $input) {
-      ...FeedbackLine_node
+      ...FeedbacksLine_node
     }
   }
 `;

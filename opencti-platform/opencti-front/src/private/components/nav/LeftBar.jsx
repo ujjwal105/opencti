@@ -1,4 +1,4 @@
-import React, { useState, useRef, useLayoutEffect } from 'react';
+import React, { useRef, useLayoutEffect, useState } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { createStyles, makeStyles, styled, useTheme } from '@mui/styles';
 import Toolbar from '@mui/material/Toolbar';
@@ -224,6 +224,7 @@ const LeftBar = () => {
   const handleToggle = () => {
     setSelectedMenu(null);
     localStorage.setItem('navOpen', String(!navOpen));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'navOpen' }));
     setNavOpen(!navOpen);
     MESSAGING$.toggleNav.next('toggle');
   };

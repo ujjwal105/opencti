@@ -50,7 +50,7 @@ const useStyles = makeStyles<Theme>((theme) => ({
   createButtonContextual: {
     position: 'fixed',
     bottom: 30,
-    right: 30,
+    right: 100,
     transition: theme.transitions.create('right', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -74,7 +74,7 @@ const indicatorMutation = graphql`
       description
       entity_type
       parent_types
-      ...IndicatorLine_node
+      ...IndicatorsLine_node
     }
   }
 `;

@@ -1,5 +1,5 @@
 import * as R from 'ramda';
-import { Dispatch, SetStateAction, SyntheticEvent, useState } from 'react';
+import { Dispatch, SetStateAction, SyntheticEvent, useCallback, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import { OrderMode, PaginationOptions } from '../../components/list_lines';
 import { emptyFilterGroup, Filter, FilterGroup, FilterValue, findFilterFromKey, isFilterGroupNotEmpty, useIsUniqFilter } from '../filters/filtersUtils';
@@ -16,6 +16,7 @@ import {
   handleChangeRepresentationFilterUtil,
 } from '../filters/filtersManageStateUtil';
 import { LocalStorage } from './useLocalStorageModel';
+import useBus from './useBus';
 
 export interface handleFilterHelpers {
   handleSwitchGlobalMode: () => void;
@@ -30,6 +31,13 @@ export interface handleFilterHelpers {
   getLatestAddFilterId: () => string | undefined;
   handleChangeRepresentationFilter: (id: string, oldValue: FilterValue, newValue: FilterValue) => void;
 }
+
+export interface NumberOfElements {
+  number?: number;
+  symbol?: string;
+  original?: number;
+}
+
 export interface UseLocalStorageHelpers extends handleFilterHelpers {
   handleSearch: (value: string) => void;
   handleRemoveFilter: (key: string, op?: string, id?: string) => void;
@@ -41,11 +49,7 @@ export interface UseLocalStorageHelpers extends handleFilterHelpers {
   handleAddSingleValueFilter: (id: string, value?: FilterValue) => void;
   handleSwitchFilter: HandleAddFilter;
   handleToggleExports: () => void;
-  handleSetNumberOfElements: (value: {
-    number?: number | string;
-    symbol?: string;
-    original?: number;
-  }) => void;
+  handleSetNumberOfElements: (value: NumberOfElements) => void;
   handleToggleTypes: (type: string) => void;
   handleClearTypes: () => void;
   handleAddProperty: (field: string, value: unknown) => void;
@@ -58,7 +62,6 @@ const localStorageToPaginationOptions = (
 ): PaginationOptions => {
   // Remove only display options, not query linked
   const localOptions = { ...props };
-  delete localOptions.redirectionMode;
   delete localOptions.openExports;
   delete localOptions.selectAll;
   delete localOptions.redirectionMode;
@@ -93,11 +96,6 @@ export type HandleOperatorFilter = (
   op: string,
 ) => void;
 
-export type UseLocalStorage = [
-  value: LocalStorage,
-  setValue: Dispatch<SetStateAction<LocalStorage>>,
-];
-
 const buildParamsFromHistory = (params: LocalStorage) => {
   return removeEmptyFields({
     filters:
@@ -110,6 +108,7 @@ const buildParamsFromHistory = (params: LocalStorage) => {
     orderAsc: params.orderAsc,
     timeField: params.timeField,
     dashboard: params.dashboard,
+    redirectionMode: params.redirectionMode,
     types:
       params.types && params.types.length > 0
         ? params.types.join(',')
@@ -172,14 +171,14 @@ const setStoredValueToHistory = (
   }
 };
 
-const useLocalStorage = (
+const useLocalStorage = <T extends LocalStorage = LocalStorage>(
   key: string,
-  initialValue?: LocalStorage,
+  initialValue?: T,
   ignoreUri?: boolean,
-): UseLocalStorage => {
+): [T, Dispatch<SetStateAction<T>>] => {
   // State to store our value
   // Pass initial state function to useState so logic is only executed once
-  const [storedValue, setStoredValue] = useState<LocalStorage>(() => {
+  const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === 'undefined') {
       return initialValue;
     }
@@ -193,9 +192,6 @@ const useLocalStorage = (
       // Parse stored json or if none return initialValue
       let value = item ? JSON.parse(item) : null;
       if (isEmptyField(value)) {
-        value = initialValue;
-      }
-      if (value?.filters?.filters.length === 0) {
         value = initialValue;
       }
       // Need to clear the local storage ?
@@ -217,17 +213,24 @@ const useLocalStorage = (
       throw Error('Error while initializing values in local storage');
     }
   });
+
+  const dispatch = useBus(key, (v) => {
+    if (!R.equals(v, storedValue)) {
+      setStoredValue(v);
+    }
+  });
   // Return a wrapped version of useState's setter function that ...
   // ... persists the new value to localStorage.
   const setValue = (
-    value: LocalStorage | ((val: LocalStorage) => LocalStorage),
+    value: T | ((val: T) => T),
   ) => {
     try {
       // Allow value to be a function so we have same API as useState
       let valueToStore = value instanceof Function ? value(storedValue) : value;
-      valueToStore = removeEmptyFields(valueToStore);
+      valueToStore = removeEmptyFields(valueToStore) as T;
       // Save state
       setStoredValue(valueToStore);
+      dispatch(key, valueToStore);
       // Save to local storage + re-align uri if needed
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
@@ -260,17 +263,34 @@ export const usePaginationLocalStorage = <U>(
   ignoreUri?: boolean,
 ): PaginationLocalStorage<U> => {
   const [viewStorage, setValue] = useLocalStorage(key, initialValue, ignoreUri);
+
+  const callback = useCallback((v: LocalStorage) => {
+    if (!R.equals(v, viewStorage)) {
+      setValue(v);
+    }
+  }, [viewStorage]);
+  const dispatch = useBus(`${key}_paginationStorage`, callback);
+
   const paginationOptions = localStorageToPaginationOptions({ count: 25, ...viewStorage });
   const helpers: UseLocalStorageHelpers = {
-    handleSearch: (value: string) => setValue((c) => ({ ...c, searchTerm: value })),
+    handleSearch: (value: string) => {
+      const newValue = {
+        ...viewStorage,
+        searchTerm: value,
+      };
+      setValue(newValue);
+      dispatch(`${key}_paginationStorage`, newValue);
+    },
     handleRemoveFilterById: (id: string) => {
       if (viewStorage?.filters) {
         const { filters } = viewStorage;
-        setValue((c) => ({
-          ...c,
+        const newValue = {
+          ...viewStorage,
           filters: handleRemoveFilterUtil({ filters, id }),
           latestAddFilterId: undefined,
-        }));
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       }
     },
     handleRemoveFilter: (k: string, op = 'eq', id?: string) => {
@@ -295,10 +315,12 @@ export const usePaginationLocalStorage = <U>(
                   newFilterElement, // remove value=id
                 ],
               };
-              setValue((c) => ({
-                ...c,
+              const newValue = {
+                ...viewStorage,
                 filters: newBaseFilters,
-              }));
+              };
+              setValue(newValue);
+              dispatch(`${key}_paginationStorage`, newValue);
             } else { // values is empty: remove the filter with key=k and operator=op
               const newBaseFilters = {
                 ...viewStorage.filters,
@@ -307,10 +329,12 @@ export const usePaginationLocalStorage = <U>(
                     .filter((f) => f.key !== k || f.operator !== op), // remove filter with key=k and operator=op
                 ],
               };
-              setValue((c) => ({
-                ...c,
+              const newValue = {
+                ...viewStorage,
                 filters: newBaseFilters,
-              }));
+              };
+              setValue(newValue);
+              dispatch(`${key}_paginationStorage`, newValue);
             }
           }
         } else {
@@ -319,23 +343,34 @@ export const usePaginationLocalStorage = <U>(
             filters: viewStorage.filters.filters
               .filter((f) => f.key !== k || f.operator !== op), // remove filter with key=k and operator=op
           };
-          setValue((c) => ({
-            ...c,
+          const newValue = {
+            ...viewStorage,
             filters: newBaseFilters,
-          }));
+          };
+          setValue(newValue);
+          dispatch(`${key}_paginationStorage`, newValue);
         }
       }
     },
-    handleSort: (field: string, order: boolean) => setValue((c) => ({
-      ...c,
-      sortBy: field,
-      orderAsc: order,
-    })),
+    handleSort: (field: string, order: boolean) => {
+      const newValue = {
+        ...viewStorage,
+        sortBy: field,
+        orderAsc: order,
+      };
+      setValue(newValue);
+      dispatch(`${key}_paginationStorage`, newValue);
+    },
     handleAddProperty: (field: string, value: unknown) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       if (!R.equals(viewStorage[field], value)) {
-        setValue((c) => ({ ...c, [field]: value }));
+        const newValue = {
+          ...viewStorage,
+          [field]: value,
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       }
     },
     handleAddFilter: (
@@ -373,10 +408,12 @@ export const usePaginationLocalStorage = <U>(
             ...viewStorage.filters.filters.map((f) => (f.key === k && f.operator === op ? newFilterElement : f)),
           ],
         };
-        setValue((c) => ({
-          ...c,
+        const newValue = {
+          ...viewStorage,
           filters: newBaseFilters,
-        }));
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       } else {
         const newFilterElement = {
           id: uuid(),
@@ -393,10 +430,12 @@ export const usePaginationLocalStorage = <U>(
           filterGroups: [],
           filters: [newFilterElement],
         };
-        setValue((c) => ({
-          ...c,
+        const newValue = {
+          ...viewStorage,
           filters: newBaseFilters,
-        }));
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       }
     },
     handleRemoveRepresentationFilter: (
@@ -405,11 +444,13 @@ export const usePaginationLocalStorage = <U>(
     ) => {
       if (viewStorage?.filters) {
         const filters = viewStorage?.filters;
-        setValue((c) => ({
-          ...c,
+        const newValue = {
+          ...viewStorage,
           filters: handleRemoveRepresentationFilterUtil({ filters, id, value }),
           latestAddFilterId: undefined,
-        }));
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       }
     },
     handleAddRepresentationFilter: (id: string, value: string) => {
@@ -417,25 +458,28 @@ export const usePaginationLocalStorage = <U>(
         const findCorrespondingFilter = viewStorage.filters?.filters.find((f) => id === f.id);
         if (findCorrespondingFilter && ['objectLabel'].includes(findCorrespondingFilter.key)) {
           if (viewStorage.filters) {
-            const { filters } = viewStorage;
-            setValue((c) => ({
-              ...c,
+            const newValue = {
+              ...viewStorage,
               filters: handleChangeOperatorFiltersUtil({
-                filters,
+                filters: viewStorage.filters,
                 id,
                 operator: findCorrespondingFilter.operator === 'not_eq' ? 'not_nil' : 'nil',
               }),
               latestAddFilterId: id,
-            }));
+            };
+            setValue(newValue);
+            dispatch(`${key}_paginationStorage`, newValue);
           }
         }
       } else if (viewStorage?.filters) {
         const { filters } = viewStorage;
-        setValue((c) => ({
-          ...c,
+        const newValue = {
+          ...viewStorage,
           filters: handleAddRepresentationFilterUtil({ filters, id, value }),
           latestAddFilterId: undefined,
-        }));
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       }
     },
     handleChangeRepresentationFilter: (id: string, oldValue: FilterValue, newValue: FilterValue) => {
@@ -444,33 +488,41 @@ export const usePaginationLocalStorage = <U>(
         return;
       }
       if (oldValue && newValue) {
-        setValue((c) => ({
-          ...c,
+        const newStorageValue = {
+          ...viewStorage,
           filters: handleChangeRepresentationFilterUtil({ filters, id, oldValue, newValue }),
           latestAddFilterId: undefined,
-        }));
+        };
+        setValue(newStorageValue);
+        dispatch(`${key}_paginationStorage`, newStorageValue);
       } else if (oldValue) {
-        setValue((c) => ({
-          ...c,
+        const newStorageValue = {
+          ...viewStorage,
           filters: handleRemoveRepresentationFilterUtil({ filters, id, value: oldValue }),
           latestAddFilterId: undefined,
-        }));
+        };
+        setValue(newStorageValue);
+        dispatch(`${key}_paginationStorage`, newStorageValue);
       } else if (newValue) {
-        setValue((c) => ({
-          ...c,
+        const newStorageValue = {
+          ...viewStorage,
           filters: handleAddRepresentationFilterUtil({ filters, id, value: newValue }),
           latestAddFilterId: undefined,
-        }));
+        };
+        setValue(newStorageValue);
+        dispatch(`${key}_paginationStorage`, newStorageValue);
       }
     },
     handleAddSingleValueFilter: (id: string, valueId?: string) => {
       if (viewStorage?.filters) {
         const { filters } = viewStorage;
-        setValue((c) => ({
-          ...c,
+        const newValue = {
+          ...viewStorage,
           filters: handleAddSingleValueFilterUtil({ filters, id, valueId }),
           latestAddFilterId: undefined,
-        }));
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       }
     },
     handleSwitchFilter: (
@@ -499,10 +551,12 @@ export const usePaginationLocalStorage = <U>(
             newFilterElement, // add new filter
           ],
         };
-        setValue((c) => ({
-          ...c,
+        const newValue = {
+          ...viewStorage,
           filters: newBaseFilters,
-        }));
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       } else {
         const newBaseFilters = viewStorage.filters ? {
           ...viewStorage.filters,
@@ -512,10 +566,12 @@ export const usePaginationLocalStorage = <U>(
           filterGroups: [],
           filters: [newFilterElement],
         };
-        setValue((c) => ({
-          ...c,
+        const newValue = {
+          ...viewStorage,
           filters: newBaseFilters,
-        }));
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       }
     },
     handleSwitchGlobalMode: () => {
@@ -524,74 +580,117 @@ export const usePaginationLocalStorage = <U>(
           ...viewStorage.filters,
           mode: viewStorage.filters.mode === 'and' ? 'or' : 'and',
         };
-        setValue((c) => ({
-          ...c,
+        const newValue = {
+          ...viewStorage,
           filters: newBaseFilters,
           latestAddFilterId: undefined,
-        }));
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       }
     },
     handleSwitchLocalMode: (filter: Filter) => {
       if (viewStorage?.filters) {
         const { filters } = viewStorage;
-        setValue((c) => ({
-          ...c,
+        const newValue = {
+          ...viewStorage,
           filters: handleSwitchLocalModeUtil({ filters, filter }),
           latestAddFilterId: undefined,
-        }));
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       }
     },
-    handleChangeView: (value: string) => setValue((c) => ({ ...c, filters: initialValue.filters ?? emptyFilterGroup, searchTerm: initialValue.searchTerm ?? '', view: value })),
-    handleToggleExports: () => setValue((c) => ({ ...c, openExports: !c.openExports })),
-    handleSetNumberOfElements: (nbElements: { number?: number | string; symbol?: string; original?: number; }) => {
+    handleChangeView: (value: string) => {
+      const newValue = {
+        ...viewStorage,
+        filters: initialValue.filters ?? emptyFilterGroup,
+        searchTerm: initialValue.searchTerm ?? '',
+        view: value,
+      };
+      setValue(newValue);
+      dispatch(`${key}_paginationStorage`, newValue);
+    },
+    handleToggleExports: () => {
+      const newValue = { ...viewStorage, openExports: !viewStorage.openExports };
+      setValue(newValue);
+      dispatch(`${key}_paginationStorage`, newValue);
+    },
+    handleSetNumberOfElements: (nbElements: { number?: number; symbol?: string; original?: number; }) => {
       if (!R.equals(nbElements, viewStorage.numberOfElements)) {
-        setValue((c) => {
-          const { number, symbol, original } = nbElements;
-          return {
-            ...c,
-            numberOfElements: {
-              ...c.numberOfElements,
-              ...(number ? { number } : { number: 0 }),
-              ...(symbol ? { symbol } : { symbol: '' }),
-              ...(original ? { original } : { original: 0 }),
-            },
-          };
-        });
+        const { number, symbol, original } = nbElements;
+        const newValue = {
+          ...viewStorage,
+          numberOfElements: {
+            ...viewStorage.numberOfElements,
+            ...(number ? { number } : { number: 0 }),
+            ...(symbol ? { symbol } : { symbol: '' }),
+            ...(original ? { original } : { original: 0 }),
+          },
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       }
     },
     handleToggleTypes: (type: string) => {
       if (viewStorage.types?.includes(type)) {
         const newTypes = viewStorage.types.filter((t) => t !== type);
-        setValue((c) => ({ ...c, types: newTypes }));
+        const newValue = {
+          ...viewStorage,
+          types: newTypes,
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       } else {
         const newTypes = viewStorage.types ? [...viewStorage.types, type] : [type];
-        setValue((c) => ({ ...c, types: newTypes }));
+        const newValue = {
+          ...viewStorage,
+          types: newTypes,
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       }
     },
     handleClearTypes: () => {
-      setValue((c) => ({ ...c, types: [] }));
+      const newValue = {
+        ...viewStorage,
+        types: [],
+      };
+      setValue(newValue);
+      dispatch(`${key}_paginationStorage`, newValue);
     },
     handleClearAllFilters: () => {
-      setValue((c) => ({ ...c, filters: initialValue.filters ?? emptyFilterGroup, searchTerm: initialValue.searchTerm ?? '' }));
+      const newValue = {
+        ...viewStorage,
+        filters: initialValue.filters ?? emptyFilterGroup,
+        searchTerm: initialValue.searchTerm ?? '',
+        numberOfElements: viewStorage.numberOfElements,
+      };
+      setValue(newValue);
+      dispatch(`${key}_paginationStorage`, newValue);
     },
     handleAddFilterWithEmptyValue: (filter: Filter) => {
       if (viewStorage?.filters) {
         const { filters } = viewStorage;
-        setValue((c) => ({
-          ...c,
+        const newValue = {
+          ...viewStorage,
           filters: handleAddFilterWithEmptyValueUtil({ filters, filter }),
           latestAddFilterId: filter.id,
-        }));
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       }
     },
     handleChangeOperatorFilters: (id: string, operator: string) => {
       if (viewStorage?.filters) {
         const { filters } = viewStorage;
-        setValue((c) => ({
-          ...c,
+        const newValue = {
+          ...viewStorage,
           filters: handleChangeOperatorFiltersUtil({ filters, id, operator }),
           latestAddFilterId: undefined,
-        }));
+        };
+        setValue(newValue);
+        dispatch(`${key}_paginationStorage`, newValue);
       }
     },
     getLatestAddFilterId: () => {

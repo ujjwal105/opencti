@@ -4,14 +4,14 @@ import LogoText from '../static/images/logo_text_dark.png';
 import LogoCollapsed from '../static/images/logo_dark.png';
 import { hexToRGB } from '../utils/Colors';
 
-const EE_COLOR = '#00f1bd';
+const EE_COLOR = '#6FD7FF';
 
-export const THEME_DARK_DEFAULT_BACKGROUND = '#070d19';
-const THEME_DARK_DEFAULT_PRIMARY = '#0fbcff';
-const THEME_DARK_DEFAULT_SECONDARY = '#00f1bd';
-const THEME_DARK_DEFAULT_ACCENT = '#0f1e38';
-const THEME_DARK_DEFAULT_PAPER = '#09101e';
-const THEME_DARK_DEFAULT_NAV = '#070d19';
+export const THEME_DARK_DEFAULT_BACKGROUND = '#02051E';
+const THEME_DARK_DEFAULT_PRIMARY = '#00f1bd';
+const THEME_DARK_DEFAULT_SECONDARY = '#0fbcff';
+const THEME_DARK_DEFAULT_ACCENT = '#001BDA';
+const THEME_DARK_DEFAULT_PAPER = '#1b1d34';
+const THEME_DARK_DEFAULT_NAV = '#1b1d34';
 
 const ThemeDark = (
   logo: string | null = null,
@@ -108,10 +108,22 @@ const ThemeDark = (
     },
   },
   components: {
+    MuiPaper: {
+      styleOverrides: {
+        // rounded: { borderColor: THEME_DARK_DEFAULT_ACCENT, borderRadius: 4 },
+      },
+    },
     MuiAccordion: {
       defaultProps: {
         TransitionProps: {
           unmountOnExit: true,
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        contained: {
+          backgroundColor: primary || THEME_DARK_DEFAULT_PRIMARY,
         },
       },
     },
@@ -143,11 +155,11 @@ const ThemeDark = (
     MuiCssBaseline: {
       styleOverrides: {
         html: {
-          scrollbarColor: `${background || THEME_DARK_DEFAULT_BACKGROUND} ${accent || THEME_DARK_DEFAULT_ACCENT}`,
+          scrollbarColor: `${accent || THEME_DARK_DEFAULT_NAV} ${background || THEME_DARK_DEFAULT_BACKGROUND} `,
           scrollbarWidth: 'thin',
         },
         body: {
-          scrollbarColor: `${background || THEME_DARK_DEFAULT_BACKGROUND} ${accent || THEME_DARK_DEFAULT_ACCENT}`,
+          scrollbarColor: `${accent || THEME_DARK_DEFAULT_NAV} ${background || THEME_DARK_DEFAULT_BACKGROUND}`,
           scrollbarWidth: 'thin',
           html: {
             WebkitFontSmoothing: 'auto',

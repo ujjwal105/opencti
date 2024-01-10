@@ -7,6 +7,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import { RecordSourceSelectorProxy } from 'relay-runtime';
 import { FormikConfig } from 'formik/dist/types';
 import Drawer, { DrawerVariant } from '@components/common/drawer/Drawer';
+import { AttackPatternsLinesPaginationQuery$variables } from '@components/techniques/__generated__/AttackPatternsLinesPaginationQuery.graphql';
 import ConfidenceField from '@components/common/form/ConfidenceField';
 import { useFormatter } from '../../../../components/i18n';
 import { handleErrorInForm } from '../../../../relay/environment';
@@ -22,8 +23,7 @@ import { useSchemaCreationValidation } from '../../../../utils/hooks/useEntitySe
 import { insertNode } from '../../../../utils/store';
 import type { Theme } from '../../../../components/Theme';
 import { Option } from '../../common/form/ReferenceField';
-import { AttackPatternCreationMutation, AttackPatternCreationMutation$variables } from './__generated__/AttackPatternCreationMutation.graphql';
-import { AttackPatternsLinesPaginationQuery$variables } from './__generated__/AttackPatternsLinesPaginationQuery.graphql';
+import { AttackPatternCreationMutation } from './__generated__/AttackPatternCreationMutation.graphql';
 import useDefaultValues from '../../../../utils/hooks/useDefaultValues';
 import CustomFileUploader from '../../common/files/CustomFileUploader';
 
