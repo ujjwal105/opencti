@@ -76,7 +76,6 @@ import { externalReferencesQueriesSearchQuery } from '../analyses/external_refer
 import StixDomainObjectCreation from '../common/stix_domain_objects/StixDomainObjectCreation';
 import ItemMarkings from '../../../components/ItemMarkings';
 import { findFilterFromKey, removeIdFromFilterGroupObject, serializeFilterGroupForBackend } from '../../../utils/filters/filtersUtils';
-import { stixCyberObservableTypes } from '../../../utils/hooks/useAttributes';
 
 const styles = (theme) => ({
   drawerPaper: {
@@ -567,7 +566,7 @@ class DataTableToolBar extends Component {
     return t('Copy');
   }
 
-  submitTask() {
+  submitTask(availableFilterKeys) {
     this.setState({ processing: true });
     const { actions, mergingElement, scope } = this.state;
     const {
@@ -582,7 +581,7 @@ class DataTableToolBar extends Component {
     } = this.props;
     if (numberOfSelectedElements === 0) return;
     const jsonFilters = serializeFilterGroupForBackend(
-      removeIdFromFilterGroupObject(filters),
+      removeIdFromFilterGroupObject(filters, availableFilterKeys),
     );
     const finalActions = R.map(
       (n) => ({
@@ -1213,35 +1212,24 @@ class DataTableToolBar extends Component {
     const entityTypeFilterValues = findFilterFromKey(filters?.filters ?? [], 'entity_type', 'eq')?.values
       ?? [];
     const typesAreNotUpdatable = R.includes(
-      R.uniq(
-        R.map((o) => o.entity_type, R.values(selectedElements || {})),
-      )[0],
-      notUpdatableTypes,
-    )
+        R.uniq(
+          R.map((o) => o.entity_type, R.values(selectedElements || {})),
+        )[0],
+        notUpdatableTypes,
+      )
       || (entityTypeFilterValues.length === 1
         && notUpdatableTypes.includes(entityTypeFilterValues[0]));
     // endregion
     // region rules
     const notScannableTypes = ['Label', 'Vocabulary', 'Case-Template', 'Task'];
     const typesAreNotScannable = R.includes(
-      R.uniq(
-        R.map((o) => o.entity_type, R.values(selectedElements || {})),
-      )[0],
-      notScannableTypes,
-    )
+        R.uniq(
+          R.map((o) => o.entity_type, R.values(selectedElements || {})),
+        )[0],
+        notScannableTypes,
+      )
       || (entityTypeFilterValues.length === 1
         && notScannableTypes.includes(entityTypeFilterValues[0]));
-    // endregion
-    // region promote filters
-    const promotionTypes = stixCyberObservableTypes.concat(['Indicator']);
-    const observablesFiltered = entityTypeFilterValues.length > 0
-      && entityTypeFilterValues.every((id) => stixCyberObservableTypes.includes(id));
-    const promotionTypesFiltered = entityTypeFilterValues.length > 0
-      && entityTypeFilterValues.every((id) => promotionTypes.includes(id));
-    const isManualPromoteSelect = !selectAll
-      && selectedTypes.length > 0
-      && selectedTypes.every((type) => promotionTypes.includes(type));
-    const promoteDisable = !isManualPromoteSelect && !promotionTypesFiltered;
     // endregion
     // region enrich
     const notEnrichableTypes = ['Label', 'Vocabulary', 'Case-Template', 'Task'];
@@ -1261,11 +1249,11 @@ class DataTableToolBar extends Component {
     );
     const notAddableTypes = ['Label', 'Vocabulary', 'Case-Template'];
     const typesAreNotAddableInContainer = R.includes(
-      R.uniq(
-        R.map((o) => o.entity_type, R.values(selectedElements || {})),
-      )[0],
-      notAddableTypes,
-    )
+        R.uniq(
+          R.map((o) => o.entity_type, R.values(selectedElements || {})),
+        )[0],
+        notAddableTypes,
+      )
       || (entityTypeFilterValues.length === 1
         && notScannableTypes.includes(entityTypeFilterValues[0]));
     const selectedElementsList = R.values(selectedElements || {});
@@ -1297,13 +1285,34 @@ class DataTableToolBar extends Component {
       }
     }
     return (
-      <>
-        <Toolbar style={{ minHeight: 40, marginTop: 2 }}>
-          <Typography
-            className={classes.title}
-            color="inherit"
-            variant="subtitle1"
-          >
+      <UserContext.Consumer>
+        {({ schema }) => {
+          // region promote filters
+          const stixCyberObservableTypes = schema.scos.map((sco) => sco.id);
+          const promotionTypes = stixCyberObservableTypes.concat(['Indicator']);
+          const observablesFiltered = entityTypeFilterValues.length > 0
+            && entityTypeFilterValues.every((id) => stixCyberObservableTypes.includes(id));
+          const promotionTypesFiltered = entityTypeFilterValues.length > 0
+            && entityTypeFilterValues.every((id) => promotionTypes.includes(id));
+          const isManualPromoteSelect = !selectAll
+            && selectedTypes.length > 0
+            && selectedTypes.every((type) => promotionTypes.includes(type));
+          const promoteDisable = !isManualPromoteSelect && !promotionTypesFiltered;
+          const filterKeysMap = new Map();
+          entityTypeFilterValues.forEach((entityType) => {
+            const currentMap = schema.filterKeysSchema.get(entityType);
+            currentMap?.forEach((value, key) => filterKeysMap.set(key, value));
+          });
+          const availableFilterKeys = Array.from(filterKeysMap.keys()).concat(['entity_type']);
+          // endregion
+          return (
+            <>
+              <Toolbar style={{ minHeight: 40, marginTop: 2 }}>
+                <Typography
+                  className={classes.title}
+                  color="inherit"
+                  variant="subtitle1"
+                >
                   <span
                     style={{
                       padding: '2px 5px 2px 5px',
@@ -1314,21 +1323,21 @@ class DataTableToolBar extends Component {
                   >
                     {numberOfSelectedElements}
                   </span>{' '}
-            {t('selected')}{' '}
-            <IconButton
-              aria-label="clear"
-              disabled={
-                numberOfSelectedElements === 0 || this.state.processing
-              }
-              onClick={handleClearSelectedElements.bind(this)}
-              size="small"
-            >
-              <ClearOutlined fontSize="small" />
-            </IconButton>
-          </Typography>
-          <Security needs={[KNOWLEDGE_KNUPDATE]}>
-            {!typesAreNotUpdatable && (
-              <Tooltip title={t('Update')}>
+                  {t('selected')}{' '}
+                  <IconButton
+                    aria-label="clear"
+                    disabled={
+                      numberOfSelectedElements === 0 || this.state.processing
+                    }
+                    onClick={handleClearSelectedElements.bind(this)}
+                    size="small"
+                  >
+                    <ClearOutlined fontSize="small" />
+                  </IconButton>
+                </Typography>
+                <Security needs={[KNOWLEDGE_KNUPDATE]}>
+                  {!typesAreNotUpdatable && (
+                    <Tooltip title={t('Update')}>
                       <span>
                         <IconButton
                           aria-label="update"
@@ -1343,19 +1352,19 @@ class DataTableToolBar extends Component {
                           <BrushOutlined fontSize="small" />
                         </IconButton>
                       </span>
-              </Tooltip>
-            )}
-            <UserContext.Consumer>
-              {({ platformModuleHelpers }) => {
-                const label = platformModuleHelpers.isRuleEngineEnable()
-                  ? 'Rule rescan'
-                  : 'Rule rescan (engine is disabled)';
-                const buttonDisable = typesAreNotScannable
-                  || !platformModuleHelpers.isRuleEngineEnable()
-                  || numberOfSelectedElements === 0
-                  || this.state.processing;
-                return typesAreNotScannable ? undefined : (
-                  <Tooltip title={t(label)}>
+                    </Tooltip>
+                  )}
+                  <UserContext.Consumer>
+                    {({ platformModuleHelpers }) => {
+                      const label = platformModuleHelpers.isRuleEngineEnable()
+                        ? 'Rule rescan'
+                        : 'Rule rescan (engine is disabled)';
+                      const buttonDisable = typesAreNotScannable
+                        || !platformModuleHelpers.isRuleEngineEnable()
+                        || numberOfSelectedElements === 0
+                        || this.state.processing;
+                      return typesAreNotScannable ? undefined : (
+                        <Tooltip title={t(label)}>
                           <span>
                             <IconButton
                               aria-label="update"
@@ -1367,12 +1376,12 @@ class DataTableToolBar extends Component {
                               <AutoFixHighOutlined fontSize="small" />
                             </IconButton>
                           </span>
-                  </Tooltip>
-                );
-              }}
-            </UserContext.Consumer>
-            {this.props.handleCopy && (
-              <Tooltip title={titleCopy}>
+                        </Tooltip>
+                      );
+                    }}
+                  </UserContext.Consumer>
+                  {this.props.handleCopy && (
+                    <Tooltip title={titleCopy}>
                       <span>
                         <IconButton
                           aria-label="copy"
@@ -1387,10 +1396,10 @@ class DataTableToolBar extends Component {
                           <ContentCopyOutlined fontSize="small" />
                         </IconButton>
                       </span>
-              </Tooltip>
-            )}
-            {!enrichDisable && (
-              <Tooltip title={t('Enrichment')}>
+                    </Tooltip>
+                  )}
+                  {!enrichDisable && (
+                    <Tooltip title={t('Enrichment')}>
                       <span>
                         <IconButton
                           aria-label="enrichment"
@@ -1402,10 +1411,10 @@ class DataTableToolBar extends Component {
                           <CloudRefreshOutline fontSize="small" />
                         </IconButton>
                       </span>
-              </Tooltip>
-            )}
-            {!promoteDisable && (
-              <Tooltip title={t('Indicators/observables generation')}>
+                    </Tooltip>
+                  )}
+                  {!promoteDisable && (
+                    <Tooltip title={t('Indicators/observables generation')}>
                       <span>
                         <IconButton
                           aria-label="promote"
@@ -1417,10 +1426,10 @@ class DataTableToolBar extends Component {
                           <TransformOutlined fontSize="small" />
                         </IconButton>
                       </span>
-              </Tooltip>
-            )}
-            {!typesAreNotMergable && (
-              <Tooltip title={t('Merge')}>
+                    </Tooltip>
+                  )}
+                  {!typesAreNotMergable && (
+                    <Tooltip title={t('Merge')}>
                       <span>
                         <IconButton
                           aria-label="merge"
@@ -1439,12 +1448,12 @@ class DataTableToolBar extends Component {
                           <MergeOutlined fontSize="small" />
                         </IconButton>
                       </span>
-              </Tooltip>
-            )}
-          </Security>
-          {!typesAreNotAddableInContainer && (
-            <Security needs={[KNOWLEDGE_KNUPDATE]}>
-              <Tooltip title={t('Add in container')}>
+                    </Tooltip>
+                  )}
+                </Security>
+                {!typesAreNotAddableInContainer && (
+                  <Security needs={[KNOWLEDGE_KNUPDATE]}>
+                    <Tooltip title={t('Add in container')}>
                       <span>
                         <IconButton
                           aria-label="input"
@@ -1459,12 +1468,12 @@ class DataTableToolBar extends Component {
                           <MoveToInboxOutlined fontSize="small" />
                         </IconButton>
                       </span>
-              </Tooltip>
-            </Security>
-          )}
-          {container && (
-            <Security needs={[KNOWLEDGE_KNUPDATE]}>
-              <Tooltip title={t('Remove from the container')}>
+                    </Tooltip>
+                  </Security>
+                )}
+                {container && (
+                  <Security needs={[KNOWLEDGE_KNUPDATE]}>
+                    <Tooltip title={t('Remove from the container')}>
                       <span>
                         <IconButton
                           aria-label="remove"
@@ -1479,12 +1488,12 @@ class DataTableToolBar extends Component {
                           <LinkOffOutlined fontSize="small" />
                         </IconButton>
                       </span>
-              </Tooltip>
-            </Security>
-          )}
-          {deleteDisable !== true && (
-            <Security needs={[KNOWLEDGE_KNUPDATE_KNDELETE]}>
-              <Tooltip title={warningMessage || t('Delete')}>
+                    </Tooltip>
+                  </Security>
+                )}
+                {deleteDisable !== true && (
+                  <Security needs={[KNOWLEDGE_KNUPDATE_KNDELETE]}>
+                    <Tooltip title={warningMessage || t('Delete')}>
                       <span>
                         <IconButton
                           aria-label="delete"
@@ -1499,24 +1508,24 @@ class DataTableToolBar extends Component {
                           <DeleteOutlined fontSize="small" />
                         </IconButton>
                       </span>
-              </Tooltip>
-            </Security>
-          )}
-        </Toolbar>
-        <Dialog
-          PaperProps={{ elevation: 1 }}
-          open={this.state.displayTask}
-          keepMounted={true}
-          TransitionComponent={Transition}
-          onClose={this.handleCloseTask.bind(this)}
-          fullWidth={true}
-          maxWidth="md"
-        >
-          <DialogTitle>
-            <div style={{ float: 'left' }}>
-              {t('Launch a background task')}
-            </div>
-            <div style={{ float: 'right' }}>
+                    </Tooltip>
+                  </Security>
+                )}
+              </Toolbar>
+              <Dialog
+                PaperProps={{ elevation: 1 }}
+                open={this.state.displayTask}
+                keepMounted={true}
+                TransitionComponent={Transition}
+                onClose={this.handleCloseTask.bind(this)}
+                fullWidth={true}
+                maxWidth="md"
+              >
+                <DialogTitle>
+                  <div style={{ float: 'left' }}>
+                    {t('Launch a background task')}
+                  </div>
+                  <div style={{ float: 'right' }}>
                     <span
                       style={{
                         padding: '2px 5px 2px 5px',
@@ -1527,54 +1536,54 @@ class DataTableToolBar extends Component {
                     >
                       {n(numberOfSelectedElements)}
                     </span>{' '}
-              {t('selected element(s)')}
-            </div>
-          </DialogTitle>
-          <DialogContent>
-            {numberOfSelectedElements > 1000 && (
-              <Alert severity="warning">
-                {t(
-                  "You're targeting more than 1000 entities with this background task, be sure of what you're doing!",
-                )}
-              </Alert>
-            )}
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>#</TableCell>
-                    <TableCell>{t('Step')}</TableCell>
-                    <TableCell>{t('Field')}</TableCell>
-                    <TableCell>{t('Values')}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>
-                      {' '}
-                      <span
-                        style={{
-                          padding: '2px 5px 2px 5px',
-                          marginRight: 5,
-                          color:
-                            theme.palette.mode === 'dark'
-                              ? '#000000'
-                              : '#ffffff',
-                          backgroundColor: theme.palette.primary.main,
-                        }}
-                      >
+                    {t('selected element(s)')}
+                  </div>
+                </DialogTitle>
+                <DialogContent>
+                  {numberOfSelectedElements > 1000 && (
+                    <Alert severity="warning">
+                      {t(
+                        "You're targeting more than 1000 entities with this background task, be sure of what you're doing!",
+                      )}
+                    </Alert>
+                  )}
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>#</TableCell>
+                          <TableCell>{t('Step')}</TableCell>
+                          <TableCell>{t('Field')}</TableCell>
+                          <TableCell>{t('Values')}</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>
+                            {' '}
+                            <span
+                              style={{
+                                padding: '2px 5px 2px 5px',
+                                marginRight: 5,
+                                color:
+                                  theme.palette.mode === 'dark'
+                                    ? '#000000'
+                                    : '#ffffff',
+                                backgroundColor: theme.palette.primary.main,
+                              }}
+                            >
                               1
                             </span>
-                    </TableCell>
-                    <TableCell>
-                      <Chip label="SCOPE" />
-                    </TableCell>
-                    <TableCell>{t('N/A')}</TableCell>
-                    <TableCell>
-                      {selectAll ? (
-                        <div className={classes.filters}>
-                          {search && search.length > 0 && (
-                            <span>
+                          </TableCell>
+                          <TableCell>
+                            <Chip label="SCOPE" />
+                          </TableCell>
+                          <TableCell>{t('N/A')}</TableCell>
+                          <TableCell>
+                            {selectAll ? (
+                              <div className={classes.filters}>
+                                {search && search.length > 0 && (
+                                  <span>
                                     <Chip
                                       classes={{ root: classes.filter }}
                                       label={
@@ -1582,14 +1591,14 @@ class DataTableToolBar extends Component {
                                           <strong>{t('Search')}</strong>: {search}
                                         </div>
                                 }
-                                    />
+                              />
                                     {filters.filters.length > 0 && (
                                       <Chip
                                         classes={{ root: classes.operator }}
                                         label={t('AND')}
                                       />
                                     )}
-                                  </span>
+                            </span>
                                 )}
                                 <TasksFilterValueContainer
                                   filters={filters}
@@ -1597,24 +1606,24 @@ class DataTableToolBar extends Component {
                               </div>
                             ) : (
                               <span>
-                                {mergingElement
-                                  ? truncate(
-                                    R.join(', ', [
-                                      defaultValue(mergingElement),
-                                    ]),
-                                    80,
-                                  )
-                                  : truncate(
-                                    R.join(
-                                      ', ',
-                                      R.map(
-                                        (o) => defaultValue(o),
-                                        R.values(selectedElements || {}),
-                                      ),
-                                    ),
-                                    80,
-                                  )}
-                              </span>
+                          {mergingElement
+                            ? truncate(
+                              R.join(', ', [
+                                defaultValue(mergingElement),
+                              ]),
+                              80,
+                            )
+                            : truncate(
+                              R.join(
+                                ', ',
+                                R.map(
+                                  (o) => defaultValue(o),
+                                  R.values(selectedElements || {}),
+                                ),
+                              ),
+                              80,
+                            )}
+                        </span>
                             )}
                           </TableCell>
                         </TableRow>
@@ -1635,8 +1644,8 @@ class DataTableToolBar extends Component {
                                     backgroundColor: theme.palette.primary.main,
                                   }}
                                 >
-                                  {number + 2}
-                                </span>
+                            {number + 2}
+                          </span>
                               </TableCell>
                               <TableCell>
                                 <Chip label={o.type} />
@@ -2240,7 +2249,7 @@ class DataTableToolBar extends Component {
                 </DialogActions>
               </Dialog>
             </>
-          );
+          )
         }}
       </UserContext.Consumer>
     );

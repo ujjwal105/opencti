@@ -47,14 +47,16 @@ const Index = ({ settings }: IndexProps) => {
   const settingsMessagesBannerHeight = useSettingsMessagesBannerHeight();
   const boxSx = {
     flexGrow: 1,
-    padding: 3,
+    paddingLeft: 3,
+    paddingRight: 3,
+    paddingBottom: 1,
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.easeInOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
     overflowY: 'hidden',
     minHeight: '100vh',
-    paddingTop: `calc( 8vh + ${settingsMessagesBannerHeight}px)`,
+    paddingTop: `calc( 16px + 48px + ${settingsMessagesBannerHeight}px)`, // 24 for margin, 48 for top bar
   };
   // Change the theme body attribute when the mode changes in
   // the palette because some components like CKEditor uses this

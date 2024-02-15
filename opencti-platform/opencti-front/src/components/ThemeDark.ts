@@ -4,14 +4,14 @@ import LogoText from '../static/images/logo_text_dark.png';
 import LogoCollapsed from '../static/images/logo_dark.png';
 import { hexToRGB } from '../utils/Colors';
 
-const EE_COLOR = '#6FD7FF';
+const EE_COLOR = '#0FBCFF';
 
-export const THEME_DARK_DEFAULT_BACKGROUND = '#02051E';
-const THEME_DARK_DEFAULT_PRIMARY = '#00f1bd';
-const THEME_DARK_DEFAULT_SECONDARY = '#0fbcff';
-const THEME_DARK_DEFAULT_ACCENT = '#001BDA';
-const THEME_DARK_DEFAULT_PAPER = '#1b1d34';
-const THEME_DARK_DEFAULT_NAV = '#1b1d34';
+export const THEME_DARK_DEFAULT_BACKGROUND = '#00020C';
+const THEME_DARK_DEFAULT_PRIMARY = '#0B8DBF';
+const THEME_DARK_DEFAULT_SECONDARY = '#99A4F0';
+const THEME_DARK_DEFAULT_ACCENT = '#00795F';
+const THEME_DARK_DEFAULT_PAPER = '#070D19';
+const THEME_DARK_DEFAULT_NAV = '#040B3C';
 
 const ThemeDark = (
   logo: string | null = null,
@@ -49,6 +49,7 @@ const ThemeDark = (
       nav: nav || THEME_DARK_DEFAULT_NAV,
       accent: accent || THEME_DARK_DEFAULT_ACCENT,
       shadow: 'rgba(255, 255, 255, 0)',
+      gradient: nav || `linear-gradient(135deg, ${THEME_DARK_DEFAULT_NAV} 0%, ${THEME_DARK_DEFAULT_BACKGROUND} 30%)`,
     },
   },
   typography: {
@@ -108,9 +109,11 @@ const ThemeDark = (
     },
   },
   components: {
-    MuiPaper: {
+    MuiDrawer: {
       styleOverrides: {
-        // rounded: { borderColor: THEME_DARK_DEFAULT_ACCENT, borderRadius: 4 },
+        paper: {
+          background: paper || THEME_DARK_DEFAULT_PAPER,
+        },
       },
     },
     MuiAccordion: {
@@ -124,6 +127,13 @@ const ThemeDark = (
       styleOverrides: {
         contained: {
           backgroundColor: primary || THEME_DARK_DEFAULT_PRIMARY,
+        },
+      },
+    },
+    MuiToolbar: {
+      styleOverrides: {
+        root: {
+          background: `linear-gradient(135deg, ${THEME_DARK_DEFAULT_NAV} 0%, ${THEME_DARK_DEFAULT_BACKGROUND} 50%)`,
         },
       },
     },

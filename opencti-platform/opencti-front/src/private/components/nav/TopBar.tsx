@@ -43,14 +43,9 @@ const useStyles = makeStyles<Theme>((theme) => ({
   appBar: {
     width: '100%',
     zIndex: theme.zIndex.drawer + 1,
-    background: 0,
-    backgroundColor: theme.palette.background.nav,
-    borderColor: theme.palette.primary.main,
-    paddingTop: theme.spacing(0.2),
-    borderLeft: 0,
-    borderRight: 0,
-    borderTop: 0,
+    background: 'none',
     color: theme.palette.text?.primary,
+    border: 'none',
   },
   logoContainer: {
     margin: '2px 0 0 -8px',
@@ -65,19 +60,18 @@ const useStyles = makeStyles<Theme>((theme) => ({
     marginRight: 4,
   },
   menuContainer: {
-    width: '50%',
-    float: 'left',
+    width: '30%',
   },
   barRight: {
     position: 'absolute',
     top: 0,
     right: 13,
     height: '100%',
+    display: 'flex',
+    alignItems: 'center',
   },
   barRightContainer: {
     float: 'left',
-    height: '100%',
-    paddingTop: 12,
   },
   subtitle: {
     color: theme.palette.text?.secondary,
@@ -227,6 +221,7 @@ const TopBarComponent: FunctionComponent<TopBarProps> = ({
     >
       {/* Header and Footer Banners containing classification level of system */}
       <Toolbar
+        variant="dense"
         style={{ marginTop: bannerHeightNumber + settingsMessagesBannerHeight }}
       >
         <div className={classes.logoContainer}>

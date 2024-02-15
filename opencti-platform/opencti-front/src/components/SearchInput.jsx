@@ -14,6 +14,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.paper,
   },
   searchRootTopBar: {
+    height: 34,
     borderRadius: 4,
     padding: '1px 10px 0 10px',
     marginRight: 5,
@@ -115,7 +116,7 @@ const SearchInput = (props) => {
             <IconButton
               component={Link}
               to="/dashboard/search"
-              size="medium"
+              size="small"
               color={
                 location.pathname.includes('/dashboard/search')
                 && !location.pathname.includes('/dashboard/search_bulk')
@@ -128,7 +129,7 @@ const SearchInput = (props) => {
             <IconButton
               component={Link}
               to="/dashboard/search_bulk"
-              size="medium"
+              size="small"
               color={
                 location.pathname.includes('/dashboard/search_bulk')
                   ? 'primary'

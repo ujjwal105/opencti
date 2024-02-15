@@ -51,7 +51,7 @@ const useStyles = makeStyles<Theme>((theme) => ({
     borderLeft: '8px solid #ffc107',
     color: 'black',
     width: '100%',
-    padding: theme.spacing(1),
+    padding: 4,
   },
   message: {
     textAlign: 'center',
@@ -62,7 +62,7 @@ const useStyles = makeStyles<Theme>((theme) => ({
   button: {
     color: '#663c00',
     position: 'absolute',
-    top: '5px',
+    top: '1px',
     right: '8px',
   },
 }));

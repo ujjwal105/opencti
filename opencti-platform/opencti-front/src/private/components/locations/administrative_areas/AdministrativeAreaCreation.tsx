@@ -24,6 +24,7 @@ import { useSchemaCreationValidation } from '../../../../utils/hooks/useEntitySe
 import { Option } from '../../common/form/ReferenceField';
 import useDefaultValues from '../../../../utils/hooks/useDefaultValues';
 import CustomFileUploader from '../../common/files/CustomFileUploader';
+import { AdministrativeAreaCreationMutation$variables } from '@components/locations/administrative_areas/__generated__/AdministrativeAreaCreationMutation.graphql';
 
 const useStyles = makeStyles<Theme>((theme) => ({
   buttons: {

@@ -18,7 +18,7 @@ const useStyles = makeStyles<Theme>((theme) => ({
     position: 'fixed',
     overflow: 'auto',
     padding: 0,
-    backgroundColor: theme.palette.background.nav,
+    backgroundColor: theme.palette.background.paper,
   },
   toolbar: theme.mixins.toolbar,
 }));

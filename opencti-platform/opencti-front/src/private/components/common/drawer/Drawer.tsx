@@ -34,7 +34,7 @@ const useStyles = makeStyles<Theme, { bannerHeightNumber: number }>((theme) => c
     paddingBottom: ({ bannerHeightNumber }) => `${bannerHeightNumber}px`,
   },
   header: {
-    backgroundColor: theme.palette.mode === 'light' ? theme.palette.background.default : theme.palette.background.nav,
+    background: theme.palette.mode === 'light' ? theme.palette.background.default : theme.palette.background.gradient,
     padding: '10px 0',
     display: 'inline-flex',
     alignItems: 'center',
@@ -121,6 +121,7 @@ const Drawer = ({
         <Fab
           onClick={() => setOpen(true)}
           color="primary"
+          size="medium"
           aria-label={update ? 'Edit' : 'Add'}
           className={classNames({
             [classes.mainButton]: true,

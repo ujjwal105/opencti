@@ -40,6 +40,7 @@ interface ExtendedBackground extends TypeBackground {
   nav: string
   accent: string
   shadow: string
+  gradient: string
 }
 
 interface ExtendedPaletteOptions extends PaletteOptions {

@@ -39,7 +39,7 @@ const Breadcrumbs: FunctionComponent<BreadcrumbsProps> = ({ elements, variant })
     className = classes.breadcrumbsObject;
   }
   return (
-    <MUIBreadcrumbs classes={{ root: className }}>
+    <MUIBreadcrumbs classes={{ root: className }} >
       {elements.map((element) => {
         if (element.current) {
           return (

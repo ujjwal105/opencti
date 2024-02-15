@@ -1,7 +1,6 @@
-import React, { useRef, useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { createStyles, makeStyles, styled, useTheme } from '@mui/styles';
-import Toolbar from '@mui/material/Toolbar';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -10,41 +9,41 @@ import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
 import {
+  AccountBalanceOutlined,
   AssignmentOutlined,
+  BiotechOutlined,
+  BugReportOutlined,
   CasesOutlined,
   ChevronLeft,
   ChevronRight,
   ConstructionOutlined,
   DashboardOutlined,
-  ExploreOutlined,
-  InsertChartOutlinedOutlined,
-  LayersOutlined,
   DescriptionOutlined,
-  WorkspacesOutlined,
-  BiotechOutlined,
-  SubjectOutlined,
-  LocalOfferOutlined,
-  TaskAltOutlined,
-  VisibilityOutlined,
-  WifiTetheringOutlined,
+  DiamondOutlined,
+  DomainOutlined,
+  EventOutlined,
   ExpandLessOutlined,
   ExpandMoreOutlined,
-  DiamondOutlined,
-  BugReportOutlined,
-  WebAssetOutlined,
-  SurroundSoundOutlined,
-  StreamOutlined,
+  ExploreOutlined,
+  FlagOutlined,
+  InsertChartOutlinedOutlined,
+  LayersOutlined,
+  LocalOfferOutlined,
+  MapOutlined,
+  PersonOutlined,
+  PlaceOutlined,
+  PublicOutlined,
   SourceOutlined,
   SpeakerNotesOutlined,
-  PersonOutlined,
   StorageOutlined,
-  AccountBalanceOutlined,
-  EventOutlined,
-  DomainOutlined,
-  PlaceOutlined,
-  MapOutlined,
-  FlagOutlined,
-  PublicOutlined,
+  StreamOutlined,
+  SubjectOutlined,
+  SurroundSoundOutlined,
+  TaskAltOutlined,
+  VisibilityOutlined,
+  WebAssetOutlined,
+  WifiTetheringOutlined,
+  WorkspacesOutlined,
 } from '@mui/icons-material';
 import {
   AccountMultipleOutline,
@@ -97,19 +96,20 @@ import logo_filigran from '../../../static/images/logo_filigran.png';
 import useEnterpriseEdition from '../../../utils/hooks/useEnterpriseEdition';
 import useDimensions from '../../../utils/hooks/useDimensions';
 
+const SMALL_BAR_WIDTH = 48;
+const OPEN_BAR_WIDTH = 180;
+
 const useStyles = makeStyles((theme) => createStyles({
   drawerPaper: {
-    width: 55,
+    width: SMALL_BAR_WIDTH,
     minHeight: '100vh',
-    background: 0,
-    backgroundColor: theme.palette.background.nav,
+    background: 'none',
     overflowX: 'hidden',
   },
   drawerPaperOpen: {
-    width: 180,
+    width: OPEN_BAR_WIDTH,
     minHeight: '100vh',
-    background: 0,
-    backgroundColor: theme.palette.background.nav,
+    background: 'none',
     overflowX: 'hidden',
   },
   menuItemIcon: {
@@ -146,25 +146,25 @@ const useStyles = makeStyles((theme) => createStyles({
     fontSize: 12,
   },
   menuCollapseOpen: {
-    width: 180,
+    width: OPEN_BAR_WIDTH,
     height: 35,
     fontWeight: 500,
     fontSize: 14,
   },
   menuCollapse: {
-    width: 55,
+    width: SMALL_BAR_WIDTH,
     height: 35,
     fontWeight: 500,
     fontSize: 14,
   },
   menuLogoOpen: {
-    width: 180,
+    width: OPEN_BAR_WIDTH,
     height: 35,
     fontWeight: 500,
     fontSize: 14,
   },
   menuLogo: {
-    width: 55,
+    width: SMALL_BAR_WIDTH,
     height: 35,
     fontWeight: 500,
     fontSize: 14,
@@ -302,10 +302,7 @@ const LeftBar = () => {
   } = useAuth();
   const settingsMessagesBannerHeight = useSettingsMessagesBannerHeight();
   const { dimension } = useDimensions();
-  const [height, setHeight] = useState(0);
-  useLayoutEffect(() => {
-    setHeight(ref.current.offsetHeight);
-  }, [selectedMenu]);
+
   const isMobile = dimension.width < 768;
   const generateSubMenu = (menu, entries) => {
     return navOpen ? (
@@ -392,18 +389,22 @@ const LeftBar = () => {
         paper: navOpen ? classes.drawerPaperOpen : classes.drawerPaper,
       }}
       sx={{
-        width: navOpen ? 180 : 55,
+        width: navOpen ? OPEN_BAR_WIDTH : SMALL_BAR_WIDTH,
+        background: theme.palette.background.gradient,
+        position: 'sticky',
+        top: 0,
+        height: '100vh',
         transition: theme.transitions.create('width', {
           easing: theme.transitions.easing.easeInOut,
           duration: theme.transitions.duration.enteringScreen,
         }),
       }}
     >
-      <Toolbar />
       <div ref={ref}>
         <MenuList
           component="nav"
-          style={{ marginTop: bannerHeightNumber + settingsMessagesBannerHeight }}
+          variant="dense"
+          style={{ marginTop: `calc( ${bannerHeightNumber}px + ${settingsMessagesBannerHeight}px + 58px )` }}
         >
           <StyledTooltip title={!navOpen && t_i18n('Home')} placement="right">
             <MenuItem
@@ -858,7 +859,7 @@ const LeftBar = () => {
           </MenuList>
         </Security>
       </div>
-      <div style={height + (navOpen && selectedMenu ? 300 : 130) < dimension.height ? { position: 'fixed', bottom: 10, left: 0 } : {}}>
+      <div style={{ marginTop: 'auto' }}>
         <MenuList component="nav">
           {(!platform_whitemark || !isEnterpriseEdition) && (
           <MenuItem
