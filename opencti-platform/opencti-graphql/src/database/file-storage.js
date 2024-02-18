@@ -6,7 +6,7 @@ import { Promise as BluePromise } from 'bluebird';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import { getDefaultRoleAssumerWithWebIdentity } from '@aws-sdk/client-sts';
 import mime from 'mime-types';
-import conf, { booleanConf, ENABLED_FILE_INDEX_MANAGER, logApp } from '../config/conf';
+import conf, { booleanConf, BUS_TOPICS, ENABLED_FILE_INDEX_MANAGER, logApp } from '../config/conf';
 import { now, sinceNowInMinutes, truncate } from '../utils/format';
 import { DatabaseError, FunctionalError, UnsupportedError } from '../config/errors';
 import { createWork, deleteWorkForFile, deleteWorkForSource } from '../domain/work';
@@ -16,6 +16,10 @@ import { pushToConnector } from './rabbitmq';
 import { elDeleteFilesByIds } from './file-search';
 import { isAttachmentProcessorEnabled } from './engine';
 import { allFilesForPaths, deleteDocumentIndex, findById as documentFindById, indexFileToDocument } from '../modules/internal/document/document-domain';
+import { createEntity } from './middleware';
+import { ENTITY_TYPE_INTERNAL_FILE } from '../schema/internalObject';
+import { notify } from './redis';
+import { ABSTRACT_STIX_DOMAIN_OBJECT } from '../schema/general';
 import { controlUserConfidenceAgainstElement } from '../utils/confidence-level';
 
 // Minio configuration
@@ -318,7 +322,7 @@ export const uploadJobImport = async (context, user, fileId, fileMime, entityId,
 };
 
 export const upload = async (context, user, filePath, fileUpload, opts) => {
-  const { entity, meta = {}, noTriggerImport = false, fileVersion, errorOnExisting = false } = opts;
+  const { entity, meta = {}, noTriggerImport = false, fileVersion, errorOnExisting = false, content_max_markings = [], file_max_markings = [] } = opts;
   const { createReadStream, filename, mimetype, encoding = '' } = await fileUpload;
   const truncatedFileName = `${truncate(path.parse(filename).name, 200, false)}${truncate(path.parse(filename).ext, 10, false)}`;
   const key = `${filePath}/${truncatedFileName}`;
@@ -369,10 +373,16 @@ export const upload = async (context, user, filePath, fileUpload, opts) => {
     information: '',
     lastModified: new Date(),
     lastModifiedSinceMin: sinceNowInMinutes(new Date()),
-    metaData: { ...fullMetadata, messages: [], errors: [] },
-    uploadStatus: 'complete'
+    metaData: { ...fullMetadata, messages: [], errors: [], content_markings: content_max_markings, file_markings: file_max_markings },
+    uploadStatus: 'complete',
+    objectMarking: [...file_max_markings],
   };
-  await indexFileToDocument(file);
+  // Register in elastic
+  const createdInternalFile = await createEntity(context, user, file, ENTITY_TYPE_INTERNAL_FILE);
+  await notify(BUS_TOPICS[ABSTRACT_STIX_DOMAIN_OBJECT].ADDED_TOPIC, createdInternalFile, user);
+  // undefined bus topic await notify(getBusTopicForEntityType(ENTITY_TYPE_INTERNAL_FILE)?.ADDED_TOPIC, createdInternalFile, user);
+
+  await indexFileToDocument(file); // replace with createEntity -> no listed file in front
 
   // confidence control on the context entity (like a report) if we want auto-enrichment
   // noThrow ; we do not want to fail here as it's an automatic process.

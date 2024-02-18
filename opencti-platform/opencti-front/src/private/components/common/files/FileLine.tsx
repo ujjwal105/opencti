@@ -517,6 +517,7 @@ const FileLine = createFragmentContainer(FileLineComponent, {
         }
         labels
       }
+      objectMarking
       ...FileWork_file
     }
   `,

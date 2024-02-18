@@ -68,12 +68,16 @@ export const fileManagerExportMutation = graphql`
     $format: String!
     $exportType: String!
     $maxMarkingDefinition: String
+    $contentMaxMarkings: [String]
+    $fileMaxMarkings: [String]
   ) {
     stixCoreObjectEdit(id: $id) {
       exportAsk(
         format: $format
         exportType: $exportType
         maxMarkingDefinition: $maxMarkingDefinition
+        contentMaxMarkings: $contentMaxMarkings
+        fileMaxMarkings: $fileMaxMarkings
       ) {
         id
         name

@@ -15,6 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import * as Yup from 'yup';
 import Tooltip from '@mui/material/Tooltip';
 import Fab from '@mui/material/Fab';
+import ObjectMarkingField from '@components/common/form/ObjectMarkingField';
 import inject18n from '../../../../components/i18n';
 import { commitMutation, MESSAGING$, QueryRenderer } from '../../../../relay/environment';
 import { markingDefinitionsLinesSearchQuery } from '../../settings/marking_definitions/MarkingDefinitionsLines';
@@ -78,6 +79,9 @@ export const StixDomainObjectsExportCreationMutation = graphql`
 
 const exportValidation = (t) => Yup.object().shape({
   format: Yup.string().required(t('This field is required')),
+  type: Yup.string().required(t('This field is required')),
+  contentMaxMarkingDefinitions: Yup.array().min(1, 'This field is required').required(t('This field is required')),
+  fileMaxMarkingDefinitions: Yup.array().min(1, 'This field is required').required(t('This field is required')),
 });
 
 export const scopesConn = (exportConnectors) => {
@@ -115,12 +119,18 @@ class StixDomainObjectsExportCreationComponent extends Component {
     const maxMarkingDefinition = values.maxMarkingDefinition === 'none'
       ? null
       : values.maxMarkingDefinition;
+
+    const contentMaxMarkingDefinitions = values.contentMaxMarkingDefinitions.map(({ value }) => value);
+    const fileMaxMarkingDefinitions = values.fileMaxMarkingDefinitions.map(({ value }) => value);
+
     commitMutation({
       mutation: StixDomainObjectsExportCreationMutation,
       variables: {
         format: values.format,
         exportType: values.type,
         maxMarkingDefinition,
+        contentMaxMarkings: contentMaxMarkingDefinitions,
+        fileMaxMarkings: fileMaxMarkingDefinitions,
         exportContext,
         ...paginationOptions,
         selectedIds,
@@ -173,6 +183,8 @@ class StixDomainObjectsExportCreationComponent extends Component {
                   format: '',
                   type: 'simple',
                   maxMarkingDefinition: 'none',
+                  contentMaxMarkingDefinitions: [],
+                  fileMaxMarkingsDefinitions: [],
                 }}
                 validationSchema={exportValidation(t)}
                 onSubmit={this.onSubmit.bind(this, selectedIds)}
@@ -253,6 +265,16 @@ class StixDomainObjectsExportCreationComponent extends Component {
                                     props.markingDefinitions.edges,
                                   )}
                                 </Field>
+                                <ObjectMarkingField
+                                  name="contentMaxMarkingDefinitions"
+                                  label={t('Content max marking definition levels')}
+                                  style={fieldSpacingContainerStyle}
+                                />
+                                <ObjectMarkingField
+                                  name="fileMaxMarkingDefinitions"
+                                  label={t('File max marking definition levels')}
+                                  style={fieldSpacingContainerStyle}
+                                />
                               </DialogContent>
                             );
                           }
