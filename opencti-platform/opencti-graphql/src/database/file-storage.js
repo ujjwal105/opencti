@@ -378,11 +378,7 @@ export const upload = async (context, user, filePath, fileUpload, opts) => {
     objectMarking: [...file_max_markings],
   };
   // Register in elastic
-  const createdInternalFile = await createEntity(context, user, file, ENTITY_TYPE_INTERNAL_FILE);
-  await notify(BUS_TOPICS[ABSTRACT_STIX_DOMAIN_OBJECT].ADDED_TOPIC, createdInternalFile, user);
-  // undefined bus topic await notify(getBusTopicForEntityType(ENTITY_TYPE_INTERNAL_FILE)?.ADDED_TOPIC, createdInternalFile, user);
-
-  await indexFileToDocument(file); // replace with createEntity -> no listed file in front
+  await createEntity(context, user, file, ENTITY_TYPE_INTERNAL_FILE);
 
   // confidence control on the context entity (like a report) if we want auto-enrichment
   // noThrow ; we do not want to fail here as it's an automatic process.

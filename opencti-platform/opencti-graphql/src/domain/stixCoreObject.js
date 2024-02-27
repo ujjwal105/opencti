@@ -356,7 +356,7 @@ export const stixCoreObjectExportPush = async (context, user, entityId, args) =>
     throw UnsupportedError('Cant upload a file an none existing element', { entityId });
   }
   const path = `export/${previous.entity_type}/${entityId}`;
-  const { upload: up } = await upload(context, user, path, args.file, { entity: previous, content_max_markings: args.content_max_markings, file_max_markings: args.file_max_markings });
+  const { upload: up } = await upload(context, user, path, args.file, { entity: previous });
   const contextData = buildContextDataForFile(previous, path, up.name);
   await publishUserAction({
     user,

@@ -174,7 +174,7 @@ const StixCoreObjectFileExportComponent = ({
               onClose={() => setOpen(false)}
               fullWidth={true}
             >
-              <DialogTitle>{t_i18n('Generate an export')}</DialogTitle>
+              <DialogTitle>{t_i18n('Generate an export')+'BOOOO'}</DialogTitle>
               {/* Duplicate code for displaying list of marking in select input. TODO a component */}
               <QueryRenderer
                 query={markingDefinitionsLinesSearchQuery}

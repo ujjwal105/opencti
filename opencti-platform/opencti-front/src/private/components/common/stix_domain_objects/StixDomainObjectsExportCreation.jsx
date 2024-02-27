@@ -199,88 +199,53 @@ class StixDomainObjectsExportCreationComponent extends Component {
                       fullWidth={true}
                     >
                       <DialogTitle>{t('Generate an export')}</DialogTitle>
-                      <QueryRenderer
-                        query={markingDefinitionsLinesSearchQuery}
-                        variables={{ first: 200 }}
-                        render={({ props }) => {
-                          if (props && props.markingDefinitions) {
-                            return (
-                              <DialogContent>
-                                <Field
-                                  component={SelectField}
-                                  variant="standard"
-                                  name="format"
-                                  label={t('Export format')}
-                                  fullWidth={true}
-                                  containerstyle={{ width: '100%' }}
-                                >
-                                  {exportScopes.map((value, i) => (
-                                    <MenuItem
-                                      key={i}
-                                      value={value}
-                                      disabled={!isExportActive(value)}
-                                    >
-                                      {value}
-                                    </MenuItem>
-                                  ))}
-                                </Field>
-                                <Field
-                                  component={SelectField}
-                                  variant="standard"
-                                  name="type"
-                                  label={t('Export type')}
-                                  fullWidth={true}
-                                  containerstyle={fieldSpacingContainerStyle}
-                                >
-                                  <MenuItem value="simple">
-                                    {t('Simple export (just the entity)')}
-                                  </MenuItem>
-                                  <MenuItem value="full">
-                                    {t(
-                                      'Full export (entity and first neighbours)',
-                                    )}
-                                  </MenuItem>
-                                </Field>
-                                <Field
-                                  component={SelectField}
-                                  variant="standard"
-                                  name="maxMarkingDefinition"
-                                  label={t('Max marking definition level')}
-                                  fullWidth={true}
-                                  containerstyle={{
-                                    marginTop: 20,
-                                    width: '100%',
-                                  }}
-                                >
-                                  <MenuItem value="none">{t('None')}</MenuItem>
-                                  {map(
-                                    (markingDefinition) => (
-                                      <MenuItem
-                                        key={markingDefinition.node.id}
-                                        value={markingDefinition.node.id}
-                                      >
-                                        {markingDefinition.node.definition}
-                                      </MenuItem>
-                                    ),
-                                    props.markingDefinitions.edges,
-                                  )}
-                                </Field>
-                                <ObjectMarkingField
-                                  name="contentMaxMarkingDefinitions"
-                                  label={t('Content max marking definition levels')}
-                                  style={fieldSpacingContainerStyle}
-                                />
-                                <ObjectMarkingField
-                                  name="fileMaxMarkingDefinitions"
-                                  label={t('File max marking definition levels')}
-                                  style={fieldSpacingContainerStyle}
-                                />
-                              </DialogContent>
-                            );
-                          }
-                          return <Loader variant="inElement" />;
-                        }}
-                      />
+                      <DialogContent>
+                        <Field
+                            component={SelectField}
+                            variant="standard"
+                            name="format"
+                            label={t('Export format')}
+                            fullWidth={true}
+                            containerstyle={{ width: '100%' }}
+                        >
+                          {exportScopes.map((value, i) => (
+                              <MenuItem
+                                  key={i}
+                                  value={value}
+                                  disabled={!isExportActive(value)}
+                              >
+                                {value}
+                              </MenuItem>
+                          ))}
+                        </Field>
+                        <Field
+                            component={SelectField}
+                            variant="standard"
+                            name="type"
+                            label={t('Export type')}
+                            fullWidth={true}
+                            containerstyle={fieldSpacingContainerStyle}
+                        >
+                          <MenuItem value="simple">
+                            {t('Simple export (just the entity)')}
+                          </MenuItem>
+                          <MenuItem value="full">
+                            {t(
+                                'Full export (entity and first neighbours)',
+                            )}
+                          </MenuItem>
+                        </Field>
+                        <ObjectMarkingField
+                            name="contentMaxMarkingDefinitions"
+                            label={t('Content max marking definition levels')}
+                            style={fieldSpacingContainerStyle}
+                        />
+                        <ObjectMarkingField
+                            name="fileMaxMarkingDefinitions"
+                            label={t('File max marking definition levels')}
+                            style={fieldSpacingContainerStyle}
+                        />
+                      </DialogContent>
                       <DialogActions>
                         <Button onClick={handleReset} disabled={isSubmitting}>
                           {t('Cancel')}
