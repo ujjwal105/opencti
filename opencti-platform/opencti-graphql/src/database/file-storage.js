@@ -322,7 +322,7 @@ export const uploadJobImport = async (context, user, fileId, fileMime, entityId,
 };
 
 export const upload = async (context, user, filePath, fileUpload, opts) => {
-  const { entity, meta = {}, noTriggerImport = false, fileVersion, errorOnExisting = false, content_max_markings = [], file_max_markings = [] } = opts;
+  const { entity, meta = {}, noTriggerImport = false, fileVersion, errorOnExisting = false, file_max_markings = [] } = opts;
   const { createReadStream, filename, mimetype, encoding = '' } = await fileUpload;
   const truncatedFileName = `${truncate(path.parse(filename).name, 200, false)}${truncate(path.parse(filename).ext, 10, false)}`;
   const key = `${filePath}/${truncatedFileName}`;
@@ -378,8 +378,8 @@ export const upload = async (context, user, filePath, fileUpload, opts) => {
     objectMarking: [...file_max_markings],
   };
   // Register in elastic
-  await createEntity(context, user, file, ENTITY_TYPE_INTERNAL_FILE);
-
+  // await createEntity(context, user, file, ENTITY_TYPE_INTERNAL_FILE);
+  await indexFileToDocument(file)
   // confidence control on the context entity (like a report) if we want auto-enrichment
   // noThrow ; we do not want to fail here as it's an automatic process.
   // we will simply not start the job

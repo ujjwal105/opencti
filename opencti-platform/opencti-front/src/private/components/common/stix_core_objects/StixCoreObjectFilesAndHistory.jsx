@@ -19,7 +19,7 @@ import ObjectMarkingField from '../form/ObjectMarkingField';
 import FileExportViewer from '../files/FileExportViewer';
 import FileImportViewer from '../files/FileImportViewer';
 import SelectField from '../../../../components/SelectField';
-import { commitMutation, MESSAGING$ } from '../../../../relay/environment';
+import {commitMutation, handleError, handleErrorInForm, MESSAGING$} from '../../../../relay/environment';
 import inject18n, { useFormatter } from '../../../../components/i18n';
 import StixCoreObjectHistory from './StixCoreObjectHistory';
 import FileExternalReferencesViewer from '../files/FileExternalReferencesViewer';
@@ -217,6 +217,9 @@ const StixCoreObjectFilesAndHistory = ({
           const newEdge = payload.setLinkedRecord(payload, 'node');
           ConnectionHandler.insertEdgeBefore(conn, newEdge);
         }
+      },
+      onError: (error) => {
+        handleError(error);
       },
       onCompleted: () => {
         setSubmitting(false);
