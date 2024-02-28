@@ -12065,7 +12065,7 @@ type StixDomainObjectEditMutations {
   importPush(file: Upload!, version: String, noTriggerImport: Boolean): File @auth(for: [KNOWLEDGE_KNUPLOAD])
   exportAsk(format: String!, exportType: String!, contentMaxMarkings: [String], fileMaxMarkings: [String]): [File!]
   @auth(for: [KNOWLEDGE_KNGETEXPORT_KNASKEXPORT])
-  exportPush(file: Upload!, content_max_markings: [String]!, file_max_markings: [String]!): Boolean @auth(for: [CONNECTORAPI])
+  exportPush(file: Upload!, file_max_markings: [String]!): Boolean @auth(for: [CONNECTORAPI])
   stixDomainObjectFileEdit(input: StixDomainObjectFileEditInput): StixDomainObject @auth(for: [KNOWLEDGE_KNUPDATE])
 }
 type AttackPatternEditMutations {

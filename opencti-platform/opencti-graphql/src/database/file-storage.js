@@ -373,7 +373,7 @@ export const upload = async (context, user, filePath, fileUpload, opts) => {
     information: '',
     lastModified: new Date(),
     lastModifiedSinceMin: sinceNowInMinutes(new Date()),
-    metaData: { ...fullMetadata, messages: [], errors: [], content_markings: content_max_markings, file_markings: file_max_markings },
+    metaData: { ...fullMetadata, messages: [], errors: [], file_markings: file_max_markings },
     uploadStatus: 'complete',
     objectMarking: [...file_max_markings],
   };

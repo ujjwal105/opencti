@@ -7567,7 +7567,7 @@ type StixDomainObjectEditMutations {
   relationDelete(toId: StixRef!, relationship_type: String): StixDomainObject
   importPush(file: Upload!, version: String, noTriggerImport: Boolean): File
   exportAsk(format: String!, exportType: String!, contentMaxMarkings: [String], fileMaxMarkings: [String]): [File!]
-  exportPush(file: Upload!, content_max_markings: [String]!, file_max_markings: [String]!): Boolean
+  exportPush(file: Upload!, file_max_markings: [String]!): Boolean
   stixDomainObjectFileEdit(input: StixDomainObjectFileEditInput): StixDomainObject
 }
 

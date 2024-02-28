@@ -22664,7 +22664,6 @@ export type StixDomainObjectEditMutationsExportAskArgs = {
 
 
 export type StixDomainObjectEditMutationsExportPushArgs = {
-  content_max_markings: Array<InputMaybe<Scalars['String']['input']>>;
   file: Scalars['Upload']['input'];
   file_max_markings: Array<InputMaybe<Scalars['String']['input']>>;
 };
@@ -35976,7 +35975,7 @@ export type StixDomainObjectEditMutationsResolvers<ContextType = any, ParentType
   contextPatch?: Resolver<Maybe<ResolversTypes['StixDomainObject']>, ParentType, ContextType, Partial<StixDomainObjectEditMutationsContextPatchArgs>>;
   delete?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   exportAsk?: Resolver<Maybe<Array<ResolversTypes['File']>>, ParentType, ContextType, RequireFields<StixDomainObjectEditMutationsExportAskArgs, 'exportType' | 'format'>>;
-  exportPush?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<StixDomainObjectEditMutationsExportPushArgs, 'content_max_markings' | 'file' | 'file_max_markings'>>;
+  exportPush?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<StixDomainObjectEditMutationsExportPushArgs, 'file' | 'file_max_markings'>>;
   fieldPatch?: Resolver<Maybe<ResolversTypes['StixDomainObject']>, ParentType, ContextType, RequireFields<StixDomainObjectEditMutationsFieldPatchArgs, 'input'>>;
   importPush?: Resolver<Maybe<ResolversTypes['File']>, ParentType, ContextType, RequireFields<StixDomainObjectEditMutationsImportPushArgs, 'file'>>;
   relationAdd?: Resolver<Maybe<ResolversTypes['StixRefRelationship']>, ParentType, ContextType, RequireFields<StixDomainObjectEditMutationsRelationAddArgs, 'input'>>;
