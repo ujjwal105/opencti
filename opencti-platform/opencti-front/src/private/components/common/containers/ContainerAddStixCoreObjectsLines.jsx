@@ -224,25 +224,23 @@ class ContainerAddStixCoreObjectsLinesComponent extends Component {
             commitMessage,
             references,
           },
-          // TODO Fix updater
-          // updater: (store) => {
-          // // ID is not valid pagination options, will be handled better when hooked
-          //   const options = { ...paginationOptions };
-          //   delete options.id;
-          //   delete options.count;
-          //   insertNode(
-          //     store,
-          //     'Pagination_objects',
-          //     options,
-          //     'containerEdit',
-          //     containerId,
-          //     'relationAdd',
-          //     input,
-          //     'to',
-          //   );
-          // },
+          updater: (store) => {
+          // ID is not valid pagination options, will be handled better when hooked
+            const options = { ...paginationOptions };
+            delete options.id;
+            delete options.count;
+            insertNode(
+              store,
+              'Pagination_objects',
+              options,
+              'containerEdit',
+              containerId,
+              'relationAdd',
+              { input, commitMessage, references },
+              'to',
+            );
+          },
           onCompleted: () => {
-            console.log('onComplete');
             if (!mapping) {
               this.setState({
                 addedStixCoreObjects: {
@@ -329,7 +327,7 @@ class ContainerAddStixCoreObjectsLinesComponent extends Component {
                   setFieldValue={setFieldValue}
                   values={values.references}
                   id={containerId}
-                  noStoreUpdate={false}
+                  noStoreUpdate={true}
                 />
               </Form>
             )}
