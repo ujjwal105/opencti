@@ -225,26 +225,22 @@ class ContainerAddStixCoreObjectsLinesComponent extends Component {
             references,
           },
           // TODO Fix updater
-          updater: (store) => {
-          // ID is not valid pagination options, will be handled better when hooked
-            console.log('a');
-            const options = { ...paginationOptions };
-            console.log('b');
-            delete options.id;
-            delete options.count;
-            console.log('c');
-            insertNode(
-              store,
-              'Pagination_objects',
-              options,
-              'containerEdit',
-              containerId,
-              'relationAdd',
-              input,
-              'to',
-            );
-            console.log('d');
-          },
+          // updater: (store) => {
+          // // ID is not valid pagination options, will be handled better when hooked
+          //   const options = { ...paginationOptions };
+          //   delete options.id;
+          //   delete options.count;
+          //   insertNode(
+          //     store,
+          //     'Pagination_objects',
+          //     options,
+          //     'containerEdit',
+          //     containerId,
+          //     'relationAdd',
+          //     input,
+          //     'to',
+          //   );
+          // },
           onCompleted: () => {
             console.log('onComplete');
             if (!mapping) {
