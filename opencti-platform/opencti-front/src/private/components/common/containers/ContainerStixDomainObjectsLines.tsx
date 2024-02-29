@@ -131,7 +131,7 @@ const ContainerStixDomainObjectsLines: FunctionComponent<ContainerStixDomainObje
   queryRef,
   onTypesChange,
   openExports,
-  enableReferences
+  enableReferences,
 }) => {
   const { data, hasMore, loadMore, isLoadingMore } = usePreloadedPaginationFragment<
   ContainerStixDomainObjectsLinesQuery,
