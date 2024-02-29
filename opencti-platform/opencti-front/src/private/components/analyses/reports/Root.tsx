@@ -204,6 +204,7 @@ const RootReport = () => {
                         <ContainerStixDomainObjects
                           {...routeProps}
                           container={report}
+                          enableReferences={enableReferences}
                         />
                       )}
                     />
@@ -244,6 +245,7 @@ const RootReport = () => {
                         <ReportKnowledge
                           {...routeProps}
                           report={report}
+                          enableReferences={enableReferences}
                         />
                       )}
                     />
