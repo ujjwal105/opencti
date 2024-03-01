@@ -367,7 +367,7 @@ export const upload = async (context, user, filePath, fileUpload, opts) => {
 
   // Register in elastic
   const file = {
-    id: key,
+    internal_id: key,
     name: truncatedFileName,
     size: uploadedFile.size,
     information: '',
