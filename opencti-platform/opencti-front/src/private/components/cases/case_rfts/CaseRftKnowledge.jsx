@@ -220,6 +220,7 @@ class CaseRftKnowledgeComponent extends Component {
       match: {
         params: { mode },
       },
+      enableReferences,
     } = this.props;
     const {
       currentModeOnlyActive,
@@ -280,6 +281,7 @@ class CaseRftKnowledgeComponent extends Component {
                     <CaseRftKnowledgeGraph
                       caseData={props.caseRft}
                       mode={mode}
+                      enableReferences={enableReferences}
                     />
                   );
                 }
@@ -353,7 +355,7 @@ class CaseRftKnowledgeComponent extends Component {
               render={({ props }) => {
                 if (props && props.caseRft) {
                   return (
-                    <CaseRftKnowledgeCorrelation caseData={props.caseRft} />
+                    <CaseRftKnowledgeCorrelation caseData={props.caseRft} enableReferences={enableReferences} />
                   );
                 }
                 return (
@@ -420,6 +422,7 @@ CaseRftKnowledgeComponent.propTypes = {
   classes: PropTypes.object,
   t: PropTypes.func,
   history: PropTypes.object,
+  enableReferences: PropTypes.bool,
 };
 
 const CaseRftKnowledge = createFragmentContainer(CaseRftKnowledgeComponent, {
