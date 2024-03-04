@@ -358,20 +358,24 @@ export const horizontalBarsChartOptions = (
         }
       },
       mouseMove: (event, chartContext, config) => {
-        if (
-          redirectionUtils
-          && config.dataPointIndex >= 0
-            && (
-              (config.seriesIndex >= 0
-                && redirectionUtils[config.dataPointIndex].series?.[config.seriesIndex]?.entity_type
-                && resolveLink(
-                  redirectionUtils[config.dataPointIndex].series?.[config.seriesIndex]?.entity_type,
-                ))
-              || (
-                !config.seriesIndex >= 0
-                && redirectionUtils[config.dataPointIndex].entity_type
-                && resolveLink(redirectionUtils[config.dataPointIndex].entity_type)
-              ))
+        if (redirectionUtils
+          && (
+            (config.dataPointIndex >= 0 // case click on a bar
+              && (
+                (config.seriesIndex >= 0
+                  && redirectionUtils[config.dataPointIndex].series?.[config.seriesIndex]?.entity_type
+                  && resolveLink(
+                    redirectionUtils[config.dataPointIndex].series?.[config.seriesIndex]?.entity_type,
+                  ))
+                || (
+                  !config.seriesIndex >= 0
+                  && redirectionUtils[config.dataPointIndex].entity_type
+                  && resolveLink(redirectionUtils[config.dataPointIndex].entity_type)
+                )
+              )
+            )
+            || event.target.parentNode.className.baseVal === 'apexcharts-text apexcharts-yaxis-label ' // case click on a label
+          )
         ) {
           // for clickable parts of the graphs
           // eslint-disable-next-line no-param-reassign
