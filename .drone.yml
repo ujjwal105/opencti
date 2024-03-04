@@ -8,9 +8,10 @@ steps:
     commands:
       - apk add git
       - export OPENCTI_BRANCH=$DRONE_SOURCE_BRANCH
-      - if [ "$DRONE_SOURCE_BRANCH" == "issue/"* ]; then echo "DISTANT_BRANCH=$(echo $DRONE_SOURCE_BRANCH | cut -d "/" -f 2)" >> variables; fi
+      - if [ "$DRONE_SOURCE_BRANCH" == "issue/"* ]; then export DISTANT_BRANCH=$(echo $DRONE_SOURCE_BRANCH | cut -d "/" -f 2); fi
       - if [ "$(echo "$(git ls-remote --heads https://github.com/OpenCTI-Platform/client-python.git $DRONE_SOURCE_BRANCH)")" != '' ]; then CLIENT_PYTHON_BRANCH=$DRONE_SOURCE_BRANCH; else CLIENT_PYTHON_BRANCH=$([[ "$(echo "$(git ls-remote --heads https://github.com/OpenCTI-Platform/client-python.git opencti/$DISTANT_BRANCH)")" != '' ]] && echo opencti/$DISTANT_BRANCH || echo 'master'); fi
       - if [ "$(echo "$(git ls-remote --heads https://github.com/OpenCTI-Platform/connectors.git $DRONE_SOURCE_BRANCH)")" != '' ]; then CONNECTOR_BRANCH=$DRONE_SOURCE_BRANCH; else CONNECTOR_BRANCH=$([[ "$(echo "$(git ls-remote --heads https://github.com/OpenCTI-Platform/connectors.git opencti/$DISTANT_BRANCH)")" != '' ]] && echo opencti/$DISTANT_BRANCH || echo 'master'); fi
+      - echo "DISTANT_BRANCH=$DISTANT_BRANCH" >> variables
       - echo "OPENCTI_BRANCH=$DRONE_SOURCE_BRANCH" >> variables
       - echo "CLIENT_PYTHON_BRANCH=$CLIENT_PYTHON_BRANCH" >> variables
       - echo "CONNECTOR_BRANCH=$CONNECTOR_BRANCH" >> variables
