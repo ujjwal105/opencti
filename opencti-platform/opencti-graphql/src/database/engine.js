@@ -2706,7 +2706,7 @@ export const elAggregationsList = async (context, user, indexName, aggregations,
 
 export const elPaginate = async (context, user, indexName, options = {}) => {
   // eslint-disable-next-line no-use-before-define
-  const { baseData = false, baseFields = BASE_FIELDS , bypassSizeLimit = false, first = ES_DEFAULT_PAGINATION } = options;
+  const { baseData = false, baseFields = BASE_FIELDS, bypassSizeLimit = false, first = ES_DEFAULT_PAGINATION } = options;
   const { types = null, connectionFormat = true } = options;
   const body = await elQueryBodyBuilder(context, user, options);
   if (body.size > ES_MAX_PAGINATION && !bypassSizeLimit) {
