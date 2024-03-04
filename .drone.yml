@@ -9,10 +9,7 @@ steps:
       - apk add build-base git libffi-dev cargo
       - OPENCTI_COMMIT=$(git rev-parse --short HEAD)
       - echo [INFO] using opencti@$DRONE_COMMIT_BRANCH:$OPENCTI_COMMIT
-      - echo $DRONE_SOURCE_BRANCH
-      - echo $DRONE_TARGET_BRANCH
-      - echo $DRONE_PULL_REQUEST
-      - echo $DRONE_BRANCH
+      - OPENCTI_TEST=$DRONE_SOURCE_BRANCH
 
   - name: api-tests
     image: nikolaik/python-nodejs:python3.11-nodejs20-alpine
@@ -44,6 +41,7 @@ steps:
       - apk add build-base git libffi-dev cargo
       - pip3 install --upgrade setuptools
       - cd opencti-platform
+      - echo $OPENCTI_TEST
       - OPENCTI_COMMIT=$(git rev-parse --short HEAD)
       - echo [INFO] using opencti@$DRONE_COMMIT_BRANCH:$OPENCTI_COMMIT
       - cd ..
