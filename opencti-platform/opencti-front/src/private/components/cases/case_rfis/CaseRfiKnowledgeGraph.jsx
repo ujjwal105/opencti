@@ -1351,7 +1351,7 @@ class CaseRfiKnowledgeGraphComponent extends Component {
   }
 
   render() {
-    const { caseData, theme, mode, enableReferences  } = this.props;
+    const { caseData, theme, mode, enableReferences } = this.props;
     const {
       mode3D,
       modeFixed,
