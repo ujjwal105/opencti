@@ -25,8 +25,8 @@ import ContainerStixDomainObjects from '../../common/containers/ContainerStixDom
 import { RootCaseRftCaseQuery } from './__generated__/RootCaseRftCaseQuery.graphql';
 import { useFormatter } from '../../../../components/i18n';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
-import {useIsEnforceReference} from "../../../../utils/hooks/useEntitySettings";
-import useGranted, {BYPASSREFERENCE} from "../../../../utils/hooks/useGranted";
+import { useIsEnforceReference } from '../../../../utils/hooks/useEntitySettings';
+import useGranted, { BYPASSREFERENCE } from '../../../../utils/hooks/useGranted';
 
 const subscription = graphql`
   subscription RootCaseRftCaseSubscription($id: ID!) {

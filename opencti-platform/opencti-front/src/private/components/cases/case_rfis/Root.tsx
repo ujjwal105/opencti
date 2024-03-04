@@ -26,8 +26,8 @@ import ContainerStixCyberObservables from '../../common/containers/ContainerStix
 import CaseRfiKnowledge from './CaseRfiKnowledge';
 import { useFormatter } from '../../../../components/i18n';
 import Breadcrumbs from '../../../../components/Breadcrumbs';
-import {useIsEnforceReference} from "../../../../utils/hooks/useEntitySettings";
-import useGranted, {BYPASSREFERENCE} from "../../../../utils/hooks/useGranted";
+import { useIsEnforceReference } from '../../../../utils/hooks/useEntitySettings';
+import useGranted, { BYPASSREFERENCE } from '../../../../utils/hooks/useGranted';
 
 const subscription = graphql`
   subscription RootCaseRfiCaseSubscription($id: ID!) {
