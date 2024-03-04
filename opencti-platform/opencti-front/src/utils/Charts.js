@@ -349,25 +349,29 @@ export const horizontalBarsChartOptions = (
       xAxisLabelClick: (event, chartContext, config) => {
         if (redirectionUtils) {
           const { labelIndex } = config;
-          const link = resolveLink(redirectionUtils[labelIndex].entity_type);
-          const entityId = redirectionUtils[labelIndex].id;
-          navigate(`${link}/${entityId}`);
+          const entityType = redirectionUtils[labelIndex].entity_type;
+          const link = resolveLink(entityType);
+          if (link) {
+            const entityId = redirectionUtils[labelIndex].id;
+            navigate(`${link}/${entityId}`);
+          }
         }
       },
       mouseMove: (event, chartContext, config) => {
         if (
           redirectionUtils
-          && ((config.dataPointIndex >= 0
-            && ((config.seriesIndex >= 0
-              && redirectionUtils[config.dataPointIndex].series?.[
-                config.seriesIndex
-              ]?.entity_type)
-              || !(
-                config.seriesIndex >= 0
-                && redirectionUtils[config.dataPointIndex].series
-              )))
-            || event.target.parentNode.className.baseVal
-              === 'apexcharts-text apexcharts-yaxis-label ')
+          && config.dataPointIndex >= 0
+            && (
+              (config.seriesIndex >= 0
+                && redirectionUtils[config.dataPointIndex].series?.[config.seriesIndex]?.entity_type
+                && resolveLink(
+                  redirectionUtils[config.dataPointIndex].series?.[config.seriesIndex]?.entity_type,
+                ))
+              || (
+                !config.seriesIndex >= 0
+                && redirectionUtils[config.dataPointIndex].entity_type
+                && resolveLink(redirectionUtils[config.dataPointIndex].entity_type)
+              ))
         ) {
           // for clickable parts of the graphs
           // eslint-disable-next-line no-param-reassign
@@ -396,15 +400,19 @@ export const horizontalBarsChartOptions = (
                   redirectionUtils[dataPointIndex].series[seriesIndex]
                     .entity_type,
                 );
-                const entityId = redirectionUtils[dataPointIndex].series[seriesIndex].id;
-                navigate(`${link}/${entityId}`);
+                if (link) {
+                  const entityId = redirectionUtils[dataPointIndex].series[seriesIndex].id;
+                  navigate(`${link}/${entityId}`);
+                }
               }
             } else {
               const link = resolveLink(
                 redirectionUtils[dataPointIndex].entity_type,
               );
-              const entityId = redirectionUtils[dataPointIndex].id;
-              navigate(`${link}/${entityId}`);
+              if (link) {
+                const entityId = redirectionUtils[dataPointIndex].id;
+                navigate(`${link}/${entityId}`);
+              }
             }
           }
         }
