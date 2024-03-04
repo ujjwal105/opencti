@@ -7,7 +7,7 @@ import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import { getDefaultRoleAssumerWithWebIdentity } from '@aws-sdk/client-sts';
 import mime from 'mime-types';
 import conf, { booleanConf, ENABLED_FILE_INDEX_MANAGER, logApp } from '../config/conf';
-import { now, sinceNowInMinutes, truncate } from '../utils/format';
+import { now, sinceNowInMinutes, truncate, utcDate } from '../utils/format';
 import { DatabaseError, FunctionalError, UnsupportedError } from '../config/errors';
 import { createWork, deleteWorkForFile, deleteWorkForSource } from '../domain/work';
 import { isNotEmptyField } from './utils';
@@ -318,13 +318,17 @@ export const uploadJobImport = async (context, user, fileId, fileMime, entityId,
 };
 
 export const upload = async (context, user, filePath, fileUpload, opts) => {
-  const { entity, meta = {}, noTriggerImport = false, fileVersion, errorOnExisting = false } = opts;
+  const { entity, meta = {}, noTriggerImport = false, errorOnExisting = false } = opts;
+  const metadata = { ...meta };
+  if (!metadata.version) {
+    metadata.version = now();
+  }
   const { createReadStream, filename, mimetype, encoding = '' } = await fileUpload;
   const truncatedFileName = `${truncate(path.parse(filename).name, 200, false)}${truncate(path.parse(filename).ext, 10, false)}`;
   const key = `${filePath}/${truncatedFileName}`;
   const currentFile = await documentFindById(context, user, key);
   if (currentFile) {
-    if (currentFile.metaData?.version === fileVersion) {
+    if (utcDate(currentFile.metaData.version).isSameOrAfter(utcDate(metadata.version))) {
       return { upload: currentFile, untouched: true };
     }
     if (errorOnExisting) {
@@ -332,19 +336,17 @@ export const upload = async (context, user, filePath, fileUpload, opts) => {
     }
   }
 
+  const creatorId = currentFile?.metaData?.creator_id ? currentFile.metaData.creator_id : user.id;
+
   // Upload the data
   const readStream = createReadStream();
   const fileMime = guessMimeType(key) || mimetype;
-  const metadata = { ...meta };
-  if (!metadata.version) {
-    metadata.version = now();
-  }
   const fullMetadata = {
     ...metadata,
     filename: encodeURIComponent(truncatedFileName),
     mimetype: fileMime,
     encoding,
-    creator_id: user.id,
+    creator_id: creatorId,
     entity_id: entity?.internal_id,
   };
   const s3Upload = new Upload({

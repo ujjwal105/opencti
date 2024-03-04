@@ -78,7 +78,7 @@ steps:
 
 
   - name: frontend-e2e-tests
-    image: node:20.11.0
+    image: node:20.11.1
     volumes:
     - name: cache-node-frontend
       path: /drone/src/opencti-platform/opencti-front/node_modules
@@ -136,7 +136,7 @@ services:
   - name: redis
     image: redis:7.2.4
   - name: elastic
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
     environment:
       discovery.type: single-node
       xpack.security.enabled: false
@@ -148,7 +148,7 @@ services:
       MINIO_ROOT_PASSWORD: ChangeMe
     command: [server, /data]
   - name: rabbitmq
-    image: rabbitmq:3.12-management
+    image: rabbitmq:3.13-management
   - name: opencti-raw-start
     image: nikolaik/python-nodejs:python3.11-nodejs20-alpine
     volumes:

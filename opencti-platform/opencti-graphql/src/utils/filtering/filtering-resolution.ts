@@ -1,3 +1,4 @@
+import * as R from 'ramda';
 import type { Filter, FilterGroup } from '../../generated/graphql';
 import { FilterMode, FilterOperator } from '../../generated/graphql';
 import {
@@ -13,7 +14,7 @@ import {
   PARTICIPANT_FILTER,
   RELATION_FROM_FILTER,
   RELATION_TO_FILTER,
-  WORKFLOW_FILTER,
+  WORKFLOW_FILTER
 } from './filtering-constants';
 import type { AuthContext, AuthUser } from '../../types/user';
 import type { StixObject } from '../../types/stix-common';
@@ -23,6 +24,7 @@ import { ENTITY_TYPE_RESOLVED_FILTERS } from '../../schema/stixDomainObject';
 import { extractFilterGroupValues, isFilterGroupNotEmpty } from './filtering-utils';
 import { ENTITY_TYPE_STATUS } from '../../schema/internalObject';
 import type { BasicWorkflowStatus } from '../../types/store';
+import { STIX_EXT_OCTI } from '../../types/stix-extensions';
 
 // list of all filters that needs resolution
 export const RESOLUTION_FILTERS = [
@@ -42,7 +44,7 @@ export const RESOLUTION_FILTERS = [
 export type FilterResolutionMap = Map<string, string>;
 
 // map (filter key) <-> (corresponding prop key in a stix object)
-const STIX_RESOLUTION_MAP_PATHS: Record<string, string> = {
+export const STIX_RESOLUTION_MAP_PATHS: Record<string, string | string[]> = {
   // [ASSIGNEE_FILTER]: 'id', // no resolution required in stix ; assignee_ids are internal ids already
   [CREATED_BY_FILTER]: 'id', // created by --> resolve with the standard id (which is the stix.id)
   [LABEL_FILTER]: 'value', // labels --> resolve id to stix.name
@@ -52,7 +54,7 @@ const STIX_RESOLUTION_MAP_PATHS: Record<string, string> = {
   [PARTICIPANT_FILTER]: 'id', // participant --> resolve with the standard id (which is the stix.id)
   [RELATION_FROM_FILTER]: 'id',
   [RELATION_TO_FILTER]: 'id',
-  [CONNECTED_TO_INSTANCE_FILTER]: 'id', // instance trigger --> resolve with the standard id (which is the stix.id)
+  [CONNECTED_TO_INSTANCE_FILTER]: ['extensions', STIX_EXT_OCTI, 'id'], // instance trigger --> resolve with the internal id
   [CONNECTED_TO_INSTANCE_SIDE_EVENTS_FILTER]: 'id', // instance trigger --> resolve with the standard id (which is the stix.id)
 };
 
@@ -125,7 +127,7 @@ export const resolveFilterGroup = async (
 /**
  * Build a resolution map thanks to the cache
  */
-const buildResolutionMapForFilter = async (context: AuthContext, user: AuthUser, filter: Filter, cache: Map<string, StixObject>) : Promise<FilterResolutionMap> => {
+const buildResolutionMapForFilter = async (context: AuthContext, user: AuthUser, filter: Filter, cache: Map<string, StixObject>): Promise<FilterResolutionMap> => {
   const map: Map<string, string> = new Map();
   if (Object.keys(STIX_RESOLUTION_MAP_PATHS).includes(filter.key[0])) {
     for (let index = 0; index < filter.values.length; index += 1) {
@@ -139,9 +141,10 @@ const buildResolutionMapForFilter = async (context: AuthContext, user: AuthUser,
         if (!(await isUserCanAccessStixElement(context, user, cachedObject))) {
           // invalidate the filter value; it won't match ever, but we keep track of this invalidation for debug purposes
           map.set(v, '<restricted-or-deleted>');
+        } else if (filter.key[0] === CONNECTED_TO_INSTANCE_FILTER) {
+          map.set(v, cachedObject.extensions[STIX_EXT_OCTI].id);
         } else {
-          // resolve according to path
-          const cachedValue = cachedObject[path];
+          const cachedValue = R.path(Array.isArray(path) ? path : [path], cachedObject);
           if (typeof cachedValue === 'string') {
             map.set(v, cachedValue);
           }
@@ -153,7 +156,7 @@ const buildResolutionMapForFilter = async (context: AuthContext, user: AuthUser,
   return map;
 };
 
-const mergeMaps = <K, V>(mapArray: Map<K, V>[]) : Map<K, V> => {
+const mergeMaps = <K, V>(mapArray: Map<K, V>[]): Map<K, V> => {
   const mergedMap = new Map<K, V>();
 
   mapArray.forEach((map) => {

@@ -50,7 +50,7 @@ const useStyles = makeStyles(() => ({
   },
   aliases: {
     float: 'left',
-    marginTop: -4,
+    marginTop: -6,
   },
   alias: {
     margin: '4px 7px 0 0',
@@ -337,7 +337,7 @@ const StixDomainObjectHeader = (props) => {
       ],
     },
   };
-  const triggerData = useLazyLoadQuery(stixCoreObjectQuickSubscriptionContentQuery, { first: 20, ...triggersPaginationOptions }, { fetchPolicy: 'network-only' });
+  const triggerData = useLazyLoadQuery(stixCoreObjectQuickSubscriptionContentQuery, { first: 20, ...triggersPaginationOptions });
 
   return (
     <React.Suspense fallback={<Loader variant={LoaderVariant.inElement} />}>
