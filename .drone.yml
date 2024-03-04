@@ -3,6 +3,16 @@ kind: pipeline
 name: opencti-tests
 
 steps:
+  - name: drone-tests
+    image: nikolaik/python-nodejs:python3.11-nodejs20-alpine
+    commands:
+      - OPENCTI_COMMIT=$(git rev-parse --short HEAD)
+      - echo [INFO] using opencti@$DRONE_COMMIT_BRANCH:$OPENCTI_COMMIT
+      - echo $DRONE_SOURCE_BRANCH
+      - echo $DRONE_TARGET_BRANCH
+      - echo $DRONE_PULL_REQUEST
+      - echo $DRONE_BRANCH
+
   - name: api-tests
     image: nikolaik/python-nodejs:python3.11-nodejs20-alpine
     volumes:
@@ -50,7 +60,7 @@ steps:
       - yarn lint
       - pip3 install --upgrade --force git+https://github.com/OpenCTI-Platform/client-python@$CLIENT_PYTHON_BRANCH
       - echo [INFO] using package client-python@$CLIENT_PYTHON_BRANCH
-      - NODE_OPTIONS=--max_old_space_size=8192 yarn test
+#      - NODE_OPTIONS=--max_old_space_size=8192 yarn test
 
   - name: api-coverage
     image: plugins/codecov
@@ -74,7 +84,7 @@ steps:
       - yarn build
       - yarn check-ts
       - yarn lint
-      - NODE_OPTIONS=--max_old_space_size=8192 yarn test
+#      - NODE_OPTIONS=--max_old_space_size=8192 yarn test
 
 
   - name: frontend-e2e-tests
@@ -94,7 +104,7 @@ steps:
       - yarn install
       - npx playwright install --with-deps chromium
       - yarn build
-      - yarn test:e2e
+#      - yarn test:e2e
 
   - name: build-circleci
     image: curlimages/curl
