@@ -183,6 +183,7 @@ services:
       EXPIRATION_SCHEDULER__ENABLED: false
       SUBSCRIPTION_SCHEDULER__ENABLED: false
     commands:
+      - sleep 10
       - cp -a opencti-platform/* /tmp/raw-start-platform/
       - pwd
       - ls
@@ -214,6 +215,7 @@ services:
       EXPIRATION_SCHEDULER__ENABLED: false
       SUBSCRIPTION_SCHEDULER__ENABLED: false
     commands:
+      - sleep 10
       - cp -a opencti-platform/* /tmp/live-start-platform/
       - source ./variables
       - apk add build-base git libffi-dev cargo
@@ -243,6 +245,7 @@ services:
       EXPIRATION_SCHEDULER__ENABLED: false
       SUBSCRIPTION_SCHEDULER__ENABLED: false
     commands:
+      - sleep 10
       - cp -a opencti-platform/* /tmp/direct-start-platform/
       - source ./variables
       - apk add build-base git libffi-dev cargo
@@ -261,6 +264,7 @@ services:
       OPENCTI_TOKEN: bfa014e0-e02e-4aa6-a42b-603b19dcf159
       WORKER_LOG_LEVEL: info
     commands:
+      - sleep 10
       - cp -a opencti-worker /tmp/direct-start-worker
       - source ./variables
       - apk add build-base git libffi-dev cargo
@@ -290,6 +294,7 @@ services:
       EXPIRATION_SCHEDULER__ENABLED: false
       SUBSCRIPTION_SCHEDULER__ENABLED: false
     commands:
+      - sleep 10
       - cp -a opencti-platform/* /tmp/restore-start-platform/
       - apk add build-base git libffi-dev cargo
       - source ./variables
