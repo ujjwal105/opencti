@@ -6,6 +6,7 @@ steps:
   - name: drone-tests
     image: nikolaik/python-nodejs:python3.11-nodejs20-alpine
     commands:
+      - apk add build-base git libffi-dev cargo
       - OPENCTI_COMMIT=$(git rev-parse --short HEAD)
       - echo [INFO] using opencti@$DRONE_COMMIT_BRANCH:$OPENCTI_COMMIT
       - echo $DRONE_SOURCE_BRANCH
