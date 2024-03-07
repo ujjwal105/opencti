@@ -368,7 +368,7 @@ export const horizontalBarsChartOptions = (
                     redirectionUtils[config.dataPointIndex].series?.[config.seriesIndex]?.entity_type,
                   ))
                 || (
-                  !config.seriesIndex >= 0
+                  !(config.seriesIndex >= 0)
                   && redirectionUtils[config.dataPointIndex].entity_type
                   && resolveLink(redirectionUtils[config.dataPointIndex].entity_type)
                 )
