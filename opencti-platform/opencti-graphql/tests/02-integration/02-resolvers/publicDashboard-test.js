@@ -565,7 +565,6 @@ describe('PublicDashboard resolver', () => {
             },
           });
           const { publicStixRelationshipsMultiTimeSeries } = data;
-          console.log(publicStixRelationshipsMultiTimeSeries);
           const attacksData = publicStixRelationshipsMultiTimeSeries[0].data;
           expect(attacksData.length).toEqual(1);
           expect(attacksData[0].value).toEqual(4);
@@ -744,7 +743,6 @@ describe('PublicDashboard resolver', () => {
             },
           });
           const { publicStixRelationships } = data;
-          console.log(publicStixRelationships);
           expect(publicStixRelationships.edges[0].node.relationship_type).toEqual('targets');
           expect(publicStixRelationships.pageInfo.globalCount).toEqual(4);
         });
