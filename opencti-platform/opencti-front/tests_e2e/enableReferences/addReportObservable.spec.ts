@@ -8,9 +8,9 @@ import TopMenuProfilePage from '../model/menu/topMenuProfile.pageModel';
 import DashboardPage from '../model/dashboard.pageModel';
 import CommitMessagePage from '../model/commitMessage.pageModel';
 import ContainerAddObservablesPage from '../model/containerAddObservables.pageModel';
-import RulesSettingsPage from '../model/rulesSettings.pageModel';
-import RuleFormPage from '../model/ruleForm.pageModel';
-import RulePage from '../model/rule.pageModel';
+import RolesSettingsPage from '../model/rolesSettings.pageModel';
+import RoleFormPage from '../model/roleForm.pageModel';
+import RolePage from '../model/role.pageModel';
 import GroupsSettingsPage from '../model/groupsSettings.pageModel';
 import GroupPage from '../model/group.pageModel';
 import GroupFormPage from '../model/groupForm.pageModel';
@@ -27,25 +27,25 @@ const noBypassGroupName = 'NoBypassReferencesTestGroup';
 
 test.describe('Create and authenticate user with no references bypass capabilities', () => {
   test('Create basic user role', async ({ page }) => {
-    const rulesSettingsPage = new RulesSettingsPage(page);
-    const rulePage = new RulePage(page);
-    const ruleFormPage = new RuleFormPage(page);
+    const rolesSettingsPage = new RolesSettingsPage(page);
+    const rolePage = new RolePage(page);
+    const roleFormPage = new RoleFormPage(page);
 
     await page.goto('/dashboard/settings/accesses/roles');
-    await expect(rulesSettingsPage.getSettingsPage()).toBeVisible();
-    await rulesSettingsPage.getAddRuleButton().click();
-    await ruleFormPage.fillNameInput(noBypassRuleName);
-    await ruleFormPage.getCreateButton().click();
-    await expect(rulesSettingsPage.getRuleInList(noBypassRuleName)).toBeVisible();
-    await rulesSettingsPage.getRuleInList(noBypassRuleName).click();
-    await rulePage.getEditButton().click();
-    await ruleFormPage.getCapabilitiesTab().click();
-    await ruleFormPage.getAccessKnowledgeCheckbox().click();
-    await expect(ruleFormPage.getAccessKnowledgeCheckbox()).toBeChecked();
-    await ruleFormPage.getCreateUpdateKnowledgeCheckbox().click();
-    await expect(ruleFormPage.getCreateUpdateKnowledgeCheckbox()).toBeChecked();
-    await ruleFormPage.getAccessAdministrationCheckbox().click();
-    await expect(ruleFormPage.getAccessAdministrationCheckbox()).toBeChecked();
+    await expect(rolesSettingsPage.getSettingsPage()).toBeVisible();
+    await rolesSettingsPage.getAddRoleButton().click();
+    await roleFormPage.fillNameInput(noBypassRuleName);
+    await roleFormPage.getCreateButton().click();
+    await expect(rolesSettingsPage.getRoleInList(noBypassRuleName)).toBeVisible();
+    await rolesSettingsPage.getRoleInList(noBypassRuleName).click();
+    await rolePage.getEditButton().click();
+    await roleFormPage.getCapabilitiesTab().click();
+    await roleFormPage.getAccessKnowledgeCheckbox().click();
+    await expect(roleFormPage.getAccessKnowledgeCheckbox()).toBeChecked();
+    await roleFormPage.getCreateUpdateKnowledgeCheckbox().click();
+    await expect(roleFormPage.getCreateUpdateKnowledgeCheckbox()).toBeChecked();
+    await roleFormPage.getAccessAdministrationCheckbox().click();
+    await expect(roleFormPage.getAccessAdministrationCheckbox()).toBeChecked();
   });
 
   test('Create basic user group', async ({ page }) => {
