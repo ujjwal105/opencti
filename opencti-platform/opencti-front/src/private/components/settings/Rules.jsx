@@ -39,7 +39,7 @@ const Rules = () => {
     {},
   );
   return (
-    <div className={classes.container} data-testid="rules-settings-page">
+    <div className={classes.container}>
       <CustomizationMenu />
       <Breadcrumbs variant="list" elements={[{ label: t_i18n('Settings') }, { label: t_i18n('Customization') }, { label: t_i18n('Rules engine'), current: true }]} />
       <UserContext.Consumer>
