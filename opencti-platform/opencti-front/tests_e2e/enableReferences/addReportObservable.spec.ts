@@ -94,6 +94,7 @@ test.describe('Authenticate no bypass user', () => {
   test('Authenticate basic user', async ({ page }) => {
     const dashboardPage = new DashboardPage(page);
     const loginPage = new LoginPage(page);
+    await page.goto('/');
     await expect(loginPage.getPage()).toBeVisible();
     await loginPage.fillLoginInput(noBypassUserLogin);
     await loginPage.fillPasswordInput(noBypassUserPassword);
