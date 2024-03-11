@@ -25,7 +25,7 @@ const noBypassUserName = 'NoBypassReferencesUser';
 const noBypassRuleName = 'NoBypassReferencesRule';
 const noBypassGroupName = 'NoBypassReferencesTestGroup';
 
-test.describe('Create and authenticate user with no references bypass capabilities', () => {
+test.describe('Create user with no references bypass capabilities', () => {
   test('Create basic user role', async ({ page }) => {
     const rolesSettingsPage = new RolesSettingsPage(page);
     const rolePage = new RolePage(page);
@@ -88,13 +88,13 @@ test.describe('Create and authenticate user with no references bypass capabiliti
     await userFormPage.getSpecificGroupCheckbox('Default (Max Confidence').click();
     await expect(userFormPage.getSpecificGroupCheckbox('Default (Max Confidence')).not.toBeChecked();
   });
+});
 
+test.describe('Authenticate no bypass user', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
   test('Authenticate basic user', async ({ page }) => {
     const dashboardPage = new DashboardPage(page);
     const loginPage = new LoginPage(page);
-    const topMenu = new TopMenuProfilePage(page);
-    await page.goto('/');
-    await topMenu.logout();
     await expect(loginPage.getPage()).toBeVisible();
     await loginPage.fillLoginInput(noBypassUserLogin);
     await loginPage.fillPasswordInput(noBypassUserPassword);
