@@ -127,7 +127,8 @@ export const MissingReferenceError = (data) => error(MISSING_REF_ERROR, 'Element
   ...data,
 });
 
-export const ValidationError = (field, data) => error('VALIDATION_ERROR', 'Validation error', {
+export const VALIDATION_ERROR = 'VALIDATION_ERROR';
+export const ValidationError = (field, data) => error(VALIDATION_ERROR, 'Validation error', {
   http_status: 500,
   genre: CATEGORY_BUSINESS,
   field,
