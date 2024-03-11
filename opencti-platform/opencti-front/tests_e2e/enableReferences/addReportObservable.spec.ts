@@ -4,7 +4,6 @@ import ContainerObservablesPage from '../model/containerObservables.pageModel';
 import ReportDetailsPage from '../model/reportDetails.pageModel';
 import ReportFormPage from '../model/reportForm.pageModel';
 import LoginPage from '../model/login.pageModel';
-import TopMenuProfilePage from '../model/menu/topMenuProfile.pageModel';
 import DashboardPage from '../model/dashboard.pageModel';
 import CommitMessagePage from '../model/commitMessage.pageModel';
 import ContainerAddObservablesPage from '../model/containerAddObservables.pageModel';
