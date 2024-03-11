@@ -21,7 +21,7 @@ const noBypassUserAuthFile = 'tests_e2e/.setup/.auth/no-bypass-ref-user.json';
 const noBypassUserLogin = 'noBypassReferences@user.test';
 const noBypassUserPassword = 'qwerty123';
 const noBypassUserName = 'NoBypassReferencesUser';
-const noBypassRuleName = 'NoBypassReferencesRule';
+const noBypassRoleName = 'NoBypassReferencesRole';
 const noBypassGroupName = 'NoBypassReferencesTestGroup';
 
 test.describe('Create user with no references bypass capabilities', () => {
@@ -33,10 +33,10 @@ test.describe('Create user with no references bypass capabilities', () => {
     await page.goto('/dashboard/settings/accesses/roles');
     await expect(rolesSettingsPage.getSettingsPage()).toBeVisible();
     await rolesSettingsPage.getAddRoleButton().click();
-    await roleFormPage.fillNameInput(noBypassRuleName);
+    await roleFormPage.fillNameInput(noBypassRoleName);
     await roleFormPage.getCreateButton().click();
-    await expect(rolesSettingsPage.getRoleInList(noBypassRuleName)).toBeVisible();
-    await rolesSettingsPage.getRoleInList(noBypassRuleName).click();
+    await expect(rolesSettingsPage.getRoleInList(noBypassRoleName)).toBeVisible();
+    await rolesSettingsPage.getRoleInList(noBypassRoleName).click();
     await rolePage.getEditButton().click();
     await roleFormPage.getCapabilitiesTab().click();
     await roleFormPage.getAccessKnowledgeCheckbox().click();
@@ -61,8 +61,8 @@ test.describe('Create user with no references bypass capabilities', () => {
     await groupsSettingsPage.getGroupInList(noBypassGroupName).click();
     await groupPage.getEditButton().click();
     await groupFormPage.getRolesTab().click();
-    await groupFormPage.getSpecificRuleCheckbox(noBypassRuleName).click();
-    await expect(groupFormPage.getSpecificRuleCheckbox(noBypassRuleName)).toBeChecked();
+    await groupFormPage.getSpecificRuleCheckbox(noBypassRoleName).click();
+    await expect(groupFormPage.getSpecificRuleCheckbox(noBypassRoleName)).toBeChecked();
   });
 
   test('Create basic user', async ({ page }) => {
